@@ -4,7 +4,7 @@ return {
 		local null_ls = require("null-ls")
 		null_ls.setup({
 			sources = {
-				null_ls.builtins.formatting['clang-format'],
+			  --	null_ls.builtins.formatting['clang-format'],
 				null_ls.builtins.formatting.stylua,
 				null_ls.builtins.formatting.isort,
 				null_ls.builtins.formatting.prettier,
@@ -13,6 +13,7 @@ return {
 				null_ls.builtins.diagnostics.pylint,
 				--        require("none-ls.diagnostics.eslint"), -- requires none-ls-extras.nvim
 			},
+      -- debug = true,
 		})
 		vim.keymap.set("n", "<leader>gf", vim.lsp.buf.format, {})
 	end,
