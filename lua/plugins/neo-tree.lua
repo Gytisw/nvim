@@ -10,6 +10,20 @@ return {
   config = function()
     require("neo-tree").setup({
       filesystem = {
+        window = {
+          mappings = {
+            ["\\"] = "close_window",
+          },
+        },
+        icons = {
+          folder_empty = "",
+          folder_empty_open = "",
+          folder_closed = "",
+          folder_open = "",
+          folder_symlink = "",
+          folder_symlink_open = "",
+          default = "",
+        },
         filtered_items = {
           visible = true,
           show_hidden_count = true,

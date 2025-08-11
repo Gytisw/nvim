@@ -8,6 +8,29 @@ return {
 			"saadparwaiz1/cmp_luasnip",
 			"rafamadriz/friendly-snippets",
 		},
+		config = function()
+			local ls = require("luasnip")
+			local s = ls.snippet
+			local t = ls.text_node
+			local i = ls.insert_node
+			local d = ls.dynamic_node
+			local c = ls.choice_node
+			local f = ls.function_node
+			local sn = ls.snippet_node
+
+			ls.add_snippets("all", {
+			  s("hello", {
+			    t("Hello, "),
+			    i(1, "world"),
+			    t("!"),
+			  }),
+			  s("date", {
+			    f(function()
+			      return os.date("%Y-%m-%d")
+			    end, {}),
+			  }),
+			})
+		end,
 	},
 	{
 		"hrsh7th/nvim-cmp",
