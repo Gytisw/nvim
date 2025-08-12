@@ -24,8 +24,14 @@ return {
         ':lua require"telescope.builtin".find_files({ hidden = true })<CR>',
         { noremap = true, silent = true }
       )
-      vim.keymap.set("n", "<C-p>", builtin.find_files, {})
-      vim.keymap.set("n", "<leader>fg", builtin.live_grep, {})
+      vim.api.nvim_set_keymap(
+        "n",
+        "<Leader>fg",
+        ':lua require"telescope.builtin".live_grep({ hidden = true })<CR>',
+        { noremap = true, silent = true, desc = "Live grep +hidden" }
+      )
+      vim.keymap.set("n", "<C-p>", builtin.find_files, { desc = "Find files"})
+      -- vim.keymap.set("n", "<leader>fg", builtin.live_grep( hidden = true ), { desc = "Live grep"})
       vim.keymap.set("n", "<leader><leader>", builtin.oldfiles, {})
 
       require("telescope").load_extension("ui-select")
