@@ -1,3 +1,5 @@
+local builtin = require("telescope.builtin")
+
 return {
   {
     "nvim-telescope/telescope-ui-select.nvim",
@@ -8,35 +10,90 @@ return {
     dependencies = { "nvim-lua/plenary.nvim", "nvim-telescope/telescope-project.nvim" },
     config = function()
       require("telescope").setup({
+        defaults = {
+          mappings = {
+            i = {
+              ["<C-j>"] = "move_selection_next",
+              ["<C-k>"] = "move_selection_previous",
+              ["<C-n>"] = "move_selection_next",
+              ["<C-p>"] = "move_selection_previous",
+              ["<C-c>"] = "close",
+              ["<Esc>"] = "close",
+            },
+            n = {
+              ["<C-c>"] = "close",
+              ["<Esc>"] = "close",
+            },
+          },
+          file_ignore_patterns = {
+            "node_modules",
+            ".git",
+            "dist",
+            "build",
+            "%.git",
+            "node_modules",
+            "%.pyc",
+            "__pycache__",
+            "%.o",
+            "%.a",
+          },
+          path_display = { "smart" },
+          prompt_prefix = "   ",
+          selection_caret = "  ",
+          layout_config = {
+            prompt_position = "top",
+          },
+          sorting_strategy = "ascending",
+        },
+        pickers = {
+          find_files = {
+            theme = "dropdown",
+            hidden = true,
+            previewer = false,
+          },
+          live_grep = {
+            theme = "dropdown",
+            hidden = true,
+          },
+          oldfiles = {
+            theme = "dropdown",
+            previewer = false,
+          },
+          buffers = {
+            theme = "dropdown",
+            previewer = false,
+            ignore_current_buffer = true,
+            sort_mru = true,
+          },
+          help_tags = {
+            theme = "dropdown",
+          },
+        },
         extensions = {
           ["ui-select"] = {
             require("telescope.themes").get_dropdown({}),
           },
           projects = {
-            -- Your project.nvim configuration for Telescope goes here if needed
+            -- Project configuration
+            display_type = "full",
+            active_project_color = 88,
+            themes = {},
           },
         },
       })
-      local builtin = require("telescope.builtin")
-      vim.api.nvim_set_keymap(
-        "n",
-        "<Leader>ff",
-        ':lua require"telescope.builtin".find_files({ hidden = true })<CR>',
-        { noremap = true, silent = true }
-      )
-      vim.api.nvim_set_keymap(
-        "n",
-        "<Leader>fg",
-        ':lua require"telescope.builtin".live_grep({ hidden = true })<CR>',
-        { noremap = true, silent = true, desc = "Live grep +hidden" }
-      )
-      vim.keymap.set("n", "<C-p>", builtin.find_files, { desc = "Find files"})
-      -- vim.keymap.set("n", "<leader>fg", builtin.live_grep( hidden = true ), { desc = "Live grep"})
-      vim.keymap.set("n", "<leader><leader>", builtin.oldfiles, {})
 
+      -- Load extensions
       require("telescope").load_extension("ui-select")
       require("telescope").load_extension("project")
+
+      -- Keybindings using modern vim.keymap.set
+      vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Find files" })
+      vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Live grep" })
+      vim.keymap.set("n", "<C-p>", builtin.find_files, { desc = "Find files" })
+      vim.keymap.set("n", "<leader><leader>", builtin.oldfiles, { desc = "Recent files" })
+      vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Find buffers" })
+      vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Find help" })
+      vim.keymap.set("n", "<leader>fp", ":Telescope projects<CR>", { desc = "Find projects" })
     end,
   },
 }
-
