@@ -30,3 +30,17 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 vim.opt.incsearch = true
 vim.opt.hlsearch = true
+
+-- Remove ~ characters from end of buffer
+vim.opt.fillchars = {
+  eob = " ",   -- Remove ~ from end of buffer
+  fold = " ",  -- Empty fold marker
+  stl = " ",   -- Status line
+  stlnc = " ", -- Status line NC
+  vert = "│",  -- Vertical split
+  diff = "─",  -- Diff
+  msgsep = "‾", -- Message separator
+  foldopen = "",  -- Fold open
+  foldclose = "", -- Fold closed
+  foldsep = "│",   -- Fold separator
+}

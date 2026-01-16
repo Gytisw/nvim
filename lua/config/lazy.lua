@@ -17,16 +17,16 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
   spec = {
-    -- Theme
-    { "folke/tokyonight.nvim", lazy = false, priority = 1000 },
-    { "tiagovla/tokyodark.nvim", lazy = false },
-    { "catppuccin/nvim", lazy = false },
-    { "ellisonleao/gruvbox.nvim", lazy = false },
-    { "rebelot/kanagawa.nvim", lazy = false },
-    { "rose-pine/neovim", lazy = false },
-    { "sainnhe/everforest", lazy = false },
-    { "EdenEast/nightfox.nvim", lazy = false },
-    { "jacoborus/tender.vim", lazy = false },
+    -- Themes
+    { import = "plugins.tokyonight" },
+    { "tiagovla/tokyodark.nvim" },
+    { "catppuccin/nvim", name = "catppuccin" },
+    { "f4z3r/gruvbox-material.nvim", name = "gruvbox" },
+    { "rebelot/kanagawa.nvim" },
+    { "rose-pine/neovim", name = "rose-pine" },
+    { "neanias/everforest-nvim" },
+    { "EdenEast/nightfox.nvim" },
+    { "jacoborus/tender.vim" },
 
     -- File Explorer
     { "nvim-neo-tree/neo-tree.nvim", branch = "v3.x" },
@@ -71,11 +71,12 @@ require("lazy").setup({
 
     -- Icons
     { "nvim-tree/nvim-web-devicons" },
+    { "echasnovski/mini.icons", version = false },
     { "nvim-neotest/nvim-nio" },
     { "MunifTanjim/nui.nvim" },
 
     -- Multi-LLM Chat (Ollama/OpenAI/etc)
-    { "Robitx/gp.nvim" },
+    { import = "plugins.gp" },
 
     -- Local Copilot Alternative (Ollama)
     { "meeehdi-dev/bropilot.nvim" },
@@ -90,9 +91,7 @@ require("lazy").setup({
     { "zbirenbaum/copilot.lua" },
 
     -- Which Key (Keybinding hints)
-    { "folke/which-key.nvim" },
-
-    -- Todo Comments (TODO/FIXME highlighting)
+    { import = "plugins.which" },
     { "folke/todo-comments.nvim" },
 
     -- Indent Blankline (Visual indentation)
