@@ -8,31 +8,117 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
       { "Failed to clone lazy.nvim:\n", "ErrorMsg" },
       { out, "WarningMsg" },
       { "\nPress any key to exit..." },
-    }, true, {})
+      }, true, {})
     vim.fn.getchar()
     os.exit(1)
   end
 end
 vim.opt.rtp:prepend(lazypath)
--- Make sure to setup `mapleader` and `maplocalleader` before
--- loading lazy.nvim so that mappings are correct.
--- This is also a good place to setup other settings (vim.opt)
--- Setup lazy.nvim
+
 require("lazy").setup({
   spec = {
-    -- import your plugins
-    { import = "plugins" },
-    
+    -- Theme
+    { "folke/tokyonight.nvim", lazy = false, priority = 1000 },
+    { "tiagovla/tokyodark.nvim", lazy = false },
+    { "catppuccin/nvim", lazy = false },
+    { "ellisonleao/gruvbox.nvim", lazy = false },
+    { "rebelot/kanagawa.nvim", lazy = false },
+    { "rose-pine/neovim", lazy = false },
+    { "sainnhe/everforest", lazy = false },
+    { "EdenEast/nightfox.nvim", lazy = false },
+    { "jacoborus/tender.vim", lazy = false },
+
+    -- File Explorer
+    { "nvim-neo-tree/neo-tree.nvim", branch = "v3.x" },
+
+    -- LSP and Mason
     { import = "plugins.dap" },
-    { "nvim-tree/nvim-web-devicons" },
-    { "nvim-neotest/nvim-nio" },
+    { import = "plugins.lsp" },
+
+    -- Completion
+    { import = "plugins.completions" },
+
+    -- Telescope
     { import = "plugins.telescope" },
     { import = "plugins.project" },
-    
+
+    -- Statusline
+    { import = "plugins.lualine" },
+
+    -- Dashboard
+    { import = "plugins.alpha" },
+
+    -- Git
+    { import = "plugins.gitsigns" },
+
+    -- Notifications
+    { import = "plugins.notify" },
+
+    -- Commenting
+    { import = "plugins.comment" },
+
+    -- Terminal
+    { import = "plugins.toggleterm" },
+
+    -- Troubleshooting
+    { import = "plugins.trouble" },
+
+    -- Treesitter
+    { import = "plugins.treesitter" },
+
+    -- Autopairs
+    { import = "plugins.nvim-autopairs" },
+
+    -- Icons
+    { "nvim-tree/nvim-web-devicons" },
+    { "nvim-neotest/nvim-nio" },
+    { "MunifTanjim/nui.nvim" },
+
+    -- Multi-LLM Chat (Ollama/OpenAI/etc)
+    { "Robitx/gp.nvim" },
+
+    -- Local Copilot Alternative (Ollama)
+    { "meeehdi-dev/bropilot.nvim" },
+
+    -- Multi-Provider LLM
+    {
+      "Kurama622/llm.nvim",
+      dependencies = { "MunifTanjim/nui.nvim" },
+    },
+
+    -- Copilot (Enhanced)
+    { "zbirenbaum/copilot.lua" },
+
+    -- Which Key (Keybinding hints)
+    { "folke/which-key.nvim" },
+
+    -- Todo Comments (TODO/FIXME highlighting)
+    { "folke/todo-comments.nvim" },
+
+    -- Indent Blankline (Visual indentation)
+    { "lukas-reineke/indent-blankline.nvim" },
+
+    -- Inlay Hints (TypeScript/Rust)
+    { "lvimuser/lsp-inlayhints.nvim" },
+
+    -- Color Picker (CSS/JS/TS)
+    { "uga-rosa/ccc.nvim" },
+
+    -- Better Quickfix
+    { "kevinhwang91/nvim-bqf" },
   },
-  -- Configure any other settings here. See the documentation for more details.
-  -- colorscheme that will be used when installing plugins.
-  install = { colorscheme = { "tokyodark" } },
-  -- automatically check for plugin updates
+  install = { colorscheme = { "tokyonight" } },
   checker = { enabled = true },
+  concurrency = 8,
+  performance = {
+    rtp = {
+      disabled_plugins = {
+        "gzip",
+        "tarPlugin",
+        "tohtml",
+        "tutor",
+        "zipPlugin",
+      },
+    },
+  },
 })
