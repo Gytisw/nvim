@@ -6,7 +6,6 @@ return {
   },
   {
     "nvim-telescope/telescope.nvim",
-    tag = "0.1.8",
     dependencies = { "nvim-lua/plenary.nvim", "nvim-telescope/telescope-project.nvim" },
     config = function()
       require("telescope").setup({
@@ -31,7 +30,6 @@ return {
             "dist",
             "build",
             "%.git",
-            "node_modules",
             "%.pyc",
             "__pycache__",
             "%.o",
@@ -74,7 +72,6 @@ return {
             require("telescope.themes").get_dropdown({}),
           },
           projects = {
-            -- Project configuration
             display_type = "full",
             active_project_color = 88,
             themes = {},

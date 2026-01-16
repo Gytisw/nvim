@@ -170,6 +170,7 @@ return {
 
     -- Keybinding to toggle neo-tree
     vim.keymap.set("n", "<C-n>", ":Neotree filesystem reveal left<CR>", { desc = "Toggle file explorer" })
+    vim.keymap.set("n", "<leader>n", ":Neotree filesystem reveal left<CR>", { desc = "Toggle file explorer" })
     vim.keymap.set("n", "<leader>nt", ":Neotree filesystem reveal left<CR>", { desc = "Toggle file explorer" })
     vim.keymap.set("n", "<leader>nb", ":Neotree buffers reveal left<CR>", { desc = "Toggle buffer explorer" })
     vim.keymap.set("n", "<leader>ng", ":Neotree git_status reveal left<CR>", { desc = "Toggle git status" })

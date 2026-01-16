@@ -10,6 +10,7 @@ return {
       providers = {
         ollama = {
           endpoint = "http://localhost:11434/v1/chat/completions",
+          model = "codellama",
         },
       },
     })

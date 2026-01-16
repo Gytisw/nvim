@@ -28,9 +28,10 @@ Because typing code manually is so 2023, this config includes multiple AI option
 
 - **Tokyonight** theme - The only theme that makes 3 AM look productive
 - **Neo-tree** - File explorer that doesn't make you want to use VS Code
-- **Lualine** - Status line with **auto theme switching** that matches your colorscheme
+- **Lualine** - Status line with **auto theme switching** and **tabline** for multi-tab editing
 - **Alpha-nvim** - Dashboard so pretty you'll forget you're in a terminal
 - **Theme Picker** - Pick from 9 themes (Tokyonight, Catppuccin, Gruvbox, Kanagawa, Rose Pine, Everforest, Nightfox, Tender, Tokyodark)
+- **No clutter** - End-of-buffer ~ characters removed for clean look
 
 ### 🛠️ Professional Toolkit
 
@@ -228,11 +229,24 @@ Run profiling to see startup time:
 
 Check the [KEYBINDINGS.md](./KEYBINDINGS.md) file. If it's not there, it probably doesn't exist... yet.
 
+### "Help, nothing shows in which-key!"
+
+Press `<leader>` to see all available keybindings. All keybindings are now registered with clear descriptions.
+
 ### "Lualine statusline isn't showing!"
 
 1. Run `:Lazy sync` to ensure the config is loaded
 2. Check `:lua print(require('lualine').get_config())` to verify setup
 3. The statusline should automatically match your colorscheme theme
+
+### "How do I use tabs?"
+
+This config supports full tab functionality:
+- `<leader>to` - Open new tab
+- `<leader>tc` - Close tab
+- `<leader>tn` / `<leader>tp` - Next/Previous tab
+- `<leader>tf` / `<leader>tl` - First/Last tab
+- Visual tabline shows all open tabs with buffer names
 
 ---
 
@@ -271,4 +285,4 @@ Found a bug? Have a suggestion? Want to tell me about a plugin I missed?
 
 *P.S. If you're reading this, you probably should have been working instead of configuring your editor.*
 
-*Last updated: January 2026 - Added theme picker & lualine auto-theming*
+*Last updated: January 2026 - Added <leader>n for Neotree, tab support, 100+ keybindings, fillchars, cleaned duplicates*

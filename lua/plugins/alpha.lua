@@ -11,7 +11,7 @@ return {
       { name = "tokyonight", label = "🌙 Tokyo Night", description = "Cyberpunk neon" },
       { name = "tokyodark", label = "🌃 Tokyo Dark", description = "Deep dark Tokyo" },
       { name = "catppuccin", label = "🍡 Catppuccin", description = "Soft pastel mocha" },
-      { name = "gruvbox", label = "🎨 Gruvbox", description = "Vintage warm retro" },
+      { name = "gruvbox-material", label = "🎨 Gruvbox", description = "Vintage warm retro" },
       { name = "kanagawa", label = "🏔️ Kanagawa", description = "Japanese dragon quest" },
       { name = "rose-pine", label = "🌲 Rose Pine", description = "Natural pine tones" },
       { name = "everforest", label = "🌿 Everforest", description = "Nature forest greens" },
@@ -55,8 +55,22 @@ return {
     end
 
     local saved = load_theme()
+    -- Apply saved theme if it exists in our themes list, otherwise default to tokyonight
     if saved then
-      vim.cmd.colorscheme(saved)
+      local theme_exists = false
+      for _, t in ipairs(themes) do
+        if t.name == saved then
+          theme_exists = true
+          break
+        end
+      end
+      if theme_exists then
+        vim.cmd.colorscheme(saved)
+      else
+        vim.cmd.colorscheme("tokyonight")
+      end
+    else
+      vim.cmd.colorscheme("tokyonight")
     end
 
     local function pick_theme()

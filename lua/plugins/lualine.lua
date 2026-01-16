@@ -2,13 +2,14 @@ return {
   "nvim-lualine/lualine.nvim",
   dependencies = {
     "nvim-tree/nvim-web-devicons",
+    "nvim-lua/plenary.nvim",
   },
   event = "VeryLazy",
   config = function()
     -- Map colorscheme names to lualine theme names
     local theme_map = {
       ["tokyonight"] = "tokyonight",
-      ["tokyodark"] = "tokyonight",
+      ["tokyodark"] = "tokyodark",
       ["catppuccin"] = "catppuccin",
       ["catppuccin-mocha"] = "catppuccin",
       ["gruvbox"] = "gruvbox",
@@ -68,9 +69,16 @@ return {
         lualine_y = {},
         lualine_z = {},
       },
-      tabline = {},
+      tabline = {
+        lualine_a = { "buffers" },
+        lualine_b = {},
+        lualine_c = {},
+        lualine_x = {},
+        lualine_y = {},
+        lualine_z = { "tabs" },
+      },
       winbar = {},
-      extensions = {},
+      extensions = { "neo-tree", "fugitive" },
     })
   end,
 }
