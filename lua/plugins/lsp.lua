@@ -2,6 +2,9 @@ return {
   {
     "williamboman/mason.nvim",
     config = function()
+      -- Detect Termux
+      local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
+      
       require("mason").setup({
         ui = {
           icons = {
@@ -10,50 +13,48 @@ return {
             package_uninstalled = "✗",
           },
         },
+        -- On Termux, disable automatic updates/checks
+        automatic_installation = not is_termux,
       })
     end,
   },
   {
     "williamboman/mason-lspconfig.nvim",
+    -- Completely skip loading on Termux
+    cond = function()
+      local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
+      local is_android = vim.loop.os_uname().sysname == "Android"
+      return not is_termux and not is_android
+    end,
     config = function()
-      -- Detect platform - only auto-install on macOS
-      local is_android = vim.loop.os_uname().sysname == "Android" or vim.env.TERMUX == "1"
-      
-      local setup_opts = {
+      require("mason-lspconfig").setup({
         automatic_installation = true,
-      }
-      
-      -- Only auto-install LSPs on macOS, not on Android/Termux
-      if not is_android then
-        setup_opts.ensure_installed = {
-          "lua_ls",      -- Lua Language Server
-          "clangd",      -- C/C++
-          "pyright",     -- Python
-          "ts_ls",       -- TypeScript/JavaScript
-          "rust_analyzer",  -- Rust (lspconfig name)
-          "gopls",       -- Go
-          "jsonls",      -- JSON
-          "yamlls",      -- YAML
-          "bashls",      -- Bash
-          "cssls",       -- CSS
-          "html",        -- HTML
-        }
-      else
-        -- On Android, skip auto-installation entirely
-        setup_opts.automatic_installation = false
-        setup_opts.ensure_installed = {}
-      end
-      
-      require("mason-lspconfig").setup(setup_opts)
+        ensure_installed = {
+          "lua_ls",
+          "clangd",
+          "pyright",
+          "ts_ls",
+          "rust_analyzer",
+          "gopls",
+          "jsonls",
+          "yamlls",
+          "bashls",
+          "cssls",
+          "html",
+        },
+      })
     end,
   },
   {
     "neovim/nvim-lspconfig",
-    dependencies = { "williamboman/mason-lspconfig.nvim" },
+    cond = function()
+      local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
+      local is_android = vim.loop.os_uname().sysname == "Android"
+      return not is_termux and not is_android
+    end,
     config = function()
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
       
-      -- Set up diagnostic signs
       vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
       vim.fn.sign_define("DiagnosticSignWarn", { text = " ", texthl = "DiagnosticSignWarn" })
       vim.fn.sign_define("DiagnosticSignHint", { text = " ", texthl = "DiagnosticSignHint" })
@@ -62,14 +63,12 @@ return {
       local on_attach = function(client, bufnr)
         local opts = { noremap = true, silent = true, buffer = bufnr }
         
-        -- LSP keybindings
         vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = bufnr, desc = "Hover" })
         vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = bufnr, desc = "Go to declaration" })
         vim.keymap.set("n", "gd", vim.lsp.buf.definition, { buffer = bufnr, desc = "Go to definition" })
         vim.keymap.set("n", "gi", vim.lsp.buf.implementation, { buffer = bufnr, desc = "Go to implementation" })
         vim.keymap.set("n", "gr", vim.lsp.buf.references, { buffer = bufnr, desc = "Go to references" })
         
-        -- Format on save
         if client.supports_method("textDocument/formatting") then
           vim.api.nvim_create_autocmd("BufWritePre", {
             group = vim.api.nvim_create_augroup("LSPFormatting", {}),
@@ -81,7 +80,6 @@ return {
         end
       end
 
-      -- Configure diagnostic signs
       vim.diagnostic.config({
         signs = {
           severity = {
@@ -104,7 +102,6 @@ return {
         severity_sort = true,
       })
 
-      -- Configure LSP servers using vim.lsp.config (new API)
       vim.lsp.config.lua_ls = {
         on_attach = on_attach,
         capabilities = capabilities,
