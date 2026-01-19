@@ -13,7 +13,7 @@ return {
             package_uninstalled = "✗",
           },
         },
-        -- On Termux, disable automatic installation checks
+        -- On Termux, disable automatic installation
         automatic_installation = not is_termux,
       })
     end,
@@ -21,15 +21,13 @@ return {
   {
     "williamboman/mason-lspconfig.nvim",
     config = function()
-      -- Detect Termux
       local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
       
       local setup_opts = {
-        -- Always auto-match LSPs to available servers, but don't auto-install
         automatic_installation = false,
       }
       
-      -- Only auto-install on desktop (non-Termux)
+      -- Only auto-install on desktop
       if not is_termux then
         setup_opts.ensure_installed = {
           "lua_ls",
@@ -54,6 +52,14 @@ return {
     dependencies = { "williamboman/mason-lspconfig.nvim" },
     config = function()
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
+      
+      -- Detect if on Termux (manually installed LSPs in PATH)
+      local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
+      
+      -- On Termux: cmd = nil (auto-discover from PATH)
+      -- On macOS: explicit cmd (Mason-installed)
+      local cmd_clangd = is_termux and nil or { "clangd" }
+      local cmd_rust_analyzer = is_termux and nil or { "rust-analyzer" }
       
       vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
       vim.fn.sign_define("DiagnosticSignWarn", { text = " ", texthl = "DiagnosticSignWarn" })
@@ -102,6 +108,7 @@ return {
         severity_sort = true,
       })
 
+      -- Lua LS (works the same on both platforms)
       vim.lsp.config.lua_ls = {
         on_attach = on_attach,
         capabilities = capabilities,
@@ -124,12 +131,14 @@ return {
         },
       }
 
+      -- Clangd - auto-detect on Termux
       vim.lsp.config.clangd = {
         on_attach = on_attach,
         capabilities = capabilities,
-        cmd = { "clangd" },
+        cmd = cmd_clangd,
       }
 
+      -- Pyright
       vim.lsp.config.pyright = {
         on_attach = on_attach,
         capabilities = capabilities,
@@ -145,6 +154,7 @@ return {
         },
       }
 
+      -- TypeScript
       vim.lsp.config.ts_ls = {
         on_attach = on_attach,
         capabilities = capabilities,
@@ -158,9 +168,11 @@ return {
         },
       }
 
+      -- Rust Analyzer - auto-detect on Termux
       vim.lsp.config.rust_analyzer = {
         on_attach = on_attach,
         capabilities = capabilities,
+        cmd = cmd_rust_analyzer,
         settings = {
           ["rust-analyzer"] = {
             cargo = {
@@ -179,6 +191,7 @@ return {
         },
       }
 
+      -- Go
       vim.lsp.config.gopls = {
         on_attach = on_attach,
         capabilities = capabilities,
@@ -193,26 +206,31 @@ return {
         },
       }
 
+      -- JSON (uses generic jsonls)
       vim.lsp.config.jsonls = {
         on_attach = on_attach,
         capabilities = capabilities,
       }
       
+      -- YAML
       vim.lsp.config.yamlls = {
         on_attach = on_attach,
         capabilities = capabilities,
       }
       
+      -- Bash
       vim.lsp.config.bashls = {
         on_attach = on_attach,
         capabilities = capabilities,
       }
       
+      -- CSS
       vim.lsp.config.cssls = {
         on_attach = on_attach,
         capabilities = capabilities,
       }
       
+      -- HTML
       vim.lsp.config.html = {
         on_attach = on_attach,
         capabilities = capabilities,
