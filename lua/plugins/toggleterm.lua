@@ -5,6 +5,6 @@ return {
     require("toggleterm").setup({
       direction = "float",
     })
-    vim.keymap.set("n", "<leader>t", "<cmd>ToggleTerm<cr>", { desc = "Toggle Terminal" })
+    -- REMOVED: All keybindings - they are now in which.lua for consistency
   end,
 }

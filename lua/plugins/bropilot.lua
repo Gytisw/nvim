@@ -6,25 +6,39 @@ return {
   },
   config = function()
     require("bropilot").setup({
-      ollama = {
-        endpoint = "http://localhost:11434/v1/chat/completions",
-        model = "codellama",
-        temperature = 0.2,
-        max_tokens = 500,
+      -- Local LLM endpoint (vLLM-MLX at port 9999)
+      provider = "ollama",
+      ollama_url = "http://localhost:9999",
+      model = "mlx-community/LFM2-2.6B-Exp-4bit",
+      
+      -- Auto-suggest settings
+      auto_suggest = true,
+      debounce = 300,  -- Wait 300ms before showing suggestion
+      
+      -- Model parameters for better code suggestions
+      model_params = {
+        temperature = 0.2,  -- Lower temperature for more deterministic output
+        top_p = 0.9,
+        max_tokens = 100,   -- Limit response length for suggestions
       },
-      suggestion = {
-        auto_accept = false,
-        debounce = 300,
-        keymaps = {
-          accept = "<Tab>",
-          next = "<M-]>",
-          prev = "<M-[>",
-          dismiss = "<C-]>",
-        },
+      
+      -- Keybindings
+      keymap = {
+        accept = "<Tab>",       -- Accept suggestion
+        accept_word = "<C-Right>",  -- Accept word
+        accept_line = "<S-Right>",  -- Accept line
+        suggest = "<C-Down>",    -- Manually trigger suggestion
+        dismiss = "<C-]>",       -- Dismiss suggestion
       },
-      panel = {
-        enabled = true,
-        open = "<leader>bp",
+      
+      -- File types to ignore
+      excluded_filetypes = {
+        "yaml",
+        "markdown",
+        "help",
+        "gitcommit",
+        "terminal",
+        "prompt",
       },
     })
   end,

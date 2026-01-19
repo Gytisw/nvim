@@ -37,7 +37,6 @@ return {
         end
       end,
     })
-
-    vim.keymap.set("n", "<leader>gf", vim.lsp.buf.format, {})
+    -- REMOVED: <leader>gf - format is now <leader>cf in which.lua
   end,
 }

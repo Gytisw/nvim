@@ -42,7 +42,7 @@ return {
       { "<leader>fg", ":Telescope live_grep<CR>", desc = "📝 Live grep text" },
       { "<leader>fb", ":Telescope buffers<CR>", desc = "📑 Find open buffers" },
       { "<leader>fh", ":Telescope help_tags<CR>", desc = "📖 Find help topics" },
-      { "<leader>fp", ":Telescope projects<CR>", desc = "📁 Find projects" },
+      { "<leader>fp", ":Telescope project<CR>", desc = "📁 Find projects" },
       { "<leader><leader>", ":Telescope oldfiles<CR>", desc = "📂 Recent files" },
       { "<C-p>", ":Telescope find_files<CR>", desc = "🔍 Quick file search" },
 
@@ -107,11 +107,25 @@ return {
       -- AI & LLM PLUGINS
       -- ═══════════════════════════════════════════════════════════════
       { "<leader>l", group = "AI/LLM" },
-      { "<leader>lc", ":GpChatNew<CR>", desc = "💬 New AI chat" },
-      { "<leader>ld", ":GpChatToggle<CR>", desc = "📎 Toggle AI chat" },
-      { "<leader>lr", ":GpChatRespond<CR>", desc = "↩️ Respond to AI" },
-      { "<leader>lb", ":BropilotPanel<CR>", desc = "🤖 Bropilot panel" },
-      { "<leader>ll", ":LlmChat<CR>", desc = "💬 LLM chat" },
+      
+      -- Bropilot (Local AI suggestions via vLLM-MLX)
+      { "<leader>lb", ":Bropilot toggle<CR>", desc = "🤖 Toggle Bropilot (local)" },
+      
+      -- gp.nvim (Chat with LLMs - OpenAI/Ollama/Anthropic)
+      { "<leader>lg", group = "gp.nvim Chat" },
+      { "<leader>lgc", ":GpChatNew<CR>", desc = "💬 New AI chat" },
+      { "<leader>lgt", ":GpChatToggle<CR>", desc = "📎 Toggle AI chat" },
+      { "<leader>lgr", ":GpChatRespond<CR>", desc = "↩️ Respond to AI" },
+
+      -- ═══════════════════════════════════════════════════════════════
+      -- COMPLETION & SNIPPETS
+      -- ═══════════════════════════════════════════════════════════════
+      { "<leader>x", group = "Completion" },
+      { "<C-Space>", ":lua require('cmp').complete()<CR>", desc = "✨ Trigger completion" },
+      { "<C-l>", ":lua require('cmp').confirm({ select = true })<CR>", desc = "✓ Accept completion" },
+      { "<C-e>", ":lua require('cmp').abort()<CR>", desc = "✕ Dismiss completion" },
+      { "<Tab>", desc = "Next completion / Accept Bropilot" },
+      { "<S-Tab>", desc = "Previous completion" },
 
       -- ═══════════════════════════════════════════════════════════════
       -- THEME & UI
@@ -181,7 +195,13 @@ return {
       -- ═══════════════════════════════════════════════════════════════
       { "<leader>o", group = "Tabs" },
       { "<leader>oo", ":tabnew<CR>", desc = "📄 New tab" },
-      { "<leader>oc", ":tabclose<CR>", desc = "❌ Close tab" },
+      { "<leader>oc", function() 
+          if #vim.api.nvim_list_tabpages() > 1 then
+            vim.cmd.tabclose()
+          else
+            vim.cmd.bdelete()
+          end
+        end, desc = "❌ Close tab (bdelete if last)" },
       { "<leader>on", ":tabnext<CR>", desc = "➡️ Next tab" },
       { "<leader>op", ":tabprevious<CR>", desc = "⬅️ Previous tab" },
       { "<leader>of", ":tabfirst<CR>", desc = "⏮️ First tab" },

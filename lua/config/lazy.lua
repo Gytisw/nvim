@@ -78,7 +78,7 @@ require("lazy").setup({
     -- Multi-LLM Chat (Ollama/OpenAI/etc)
     { import = "plugins.gp" },
 
-    -- Local Copilot Alternative (Ollama)
+    -- Local Copilot Alternative (Ollama) - Using bropilot for local AI suggestions
     { "meeehdi-dev/bropilot.nvim" },
 
     -- Multi-Provider LLM
@@ -86,9 +86,6 @@ require("lazy").setup({
       "Kurama622/llm.nvim",
       dependencies = { "MunifTanjim/nui.nvim" },
     },
-
-    -- Copilot (Enhanced)
-    { "zbirenbaum/copilot.lua" },
 
     -- Which Key (Keybinding hints)
     { import = "plugins.which" },

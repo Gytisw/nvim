@@ -14,7 +14,6 @@ return {
     })
 
     require("telescope").load_extension("project")
-
-    vim.keymap.set("n", "<leader>fp", "<cmd>Telescope project<CR>", { desc = "Find projects" })
+    -- REMOVED: <leader>fp keybinding - it's in which.lua now
   end,
 }

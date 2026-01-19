@@ -8,172 +8,129 @@ return {
   },
   config = function()
     require("neo-tree").setup({
-      -- Sources configuration
-      sources = {
-        "filesystem",
-        "buffers",
-        "git_status",
-        "document_symbols",
-      },
-      -- Source handler configuration
-      source_selector = {
-        winbar = true,
-        content = {
-          source_statusline = {
-            highlight = "NeoTreeSourceName",
-          },
-        },
-      },
-      -- Window configuration
+      enable_diagnostics = true,
+      enable_git_status = true,
+      enable_modified_markers = true,
+      enable_refresh_on_write = true,
+      git_status_async = true,
+      git_status_use_nvimkit = false,
+      hide_cursorline = false,
+      hide_root_node = false,
+      retain_hidden_root_indent = false,
+      case_insensitive = false,
       window = {
         position = "left",
-        width = 35,
+        width = 40,
         mapping_options = {
           noremap = true,
           nowait = true,
         },
         mappings = {
-          ["\\"] = "close_window",
+          ["<space>"] = {
+            "toggle_node",
+            nowait = false,
+          },
           ["<2-LeftMouse>"] = "open",
           ["<cr>"] = "open",
-          ["<esc>"] = "cancel", -- Cancel preview mode
+          ["<esc>"] = "cancel",
           ["P"] = { "toggle_preview", config = { use_float = true } },
           ["S"] = "open_split",
           ["s"] = "open_vsplit",
-          ["t"] = "open_tabnew",
-          ["w"] = "open_with_window_picker",
           ["C"] = "close_node",
           ["z"] = "close_all_nodes",
-          ["a"] = "add_directory",
-          ["A"] = "add",
-          ["d"] = "delete",
-          ["r"] = "rename",
-          ["y"] = "copy_to_clipboard",
-          ["x"] = "cut_to_clipboard",
-          ["p"] = "paste_from_clipboard",
-          ["c"] = "copy", -- Copy name
-          ["m"] = "move", -- Move name
-          ["q"] = "close_window",
           ["R"] = "refresh",
           ["?"] = "show_help",
+          ["<"] = "prev_source",
+          [">"] = "next_source",
         },
       },
-      -- Filesystem configuration
+      nesting_rules = {},
       filesystem = {
-        window = {
-          mappings = {
-            ["\\"] = "close_window",
-            ["<C-h>"] = "navigate_up",
-            ["."] = "set_root",
-            ["H"] = "toggle_hidden",
-            ["/"] = "fuzzy_finder_directory",
-            ["f"] = "filter_on_submit",
-            ["<C-c>"] = "clear_filter",
-            ["<bs>"] = "toggle_hidden",
-          },
-        },
-        -- Filtering configuration
         filtered_items = {
-          visible = true,
-          show_hidden_count = true,
-          hide_dotfiles = false,
+          visible = false,
+          hide_dotfiles = true,
           hide_gitignored = true,
+          hide_hidden = true,
           hide_by_name = {
-            ".git",
             ".DS_Store",
             "thumbs.db",
             "node_modules",
           },
-          never_show = {},
+          hide_by_pattern = {},
+          show_hidden = false,
         },
-        -- Follow current file
         follow_current_file = {
           enabled = true,
+          leave_dirs_open = false,
         },
-        -- Use indentation for nested items
-        indent_markers = {
-          enabled = true,
-        },
-        -- Git status integration
-        git_status_async = true,
-        -- Hijack netrw
-        hijack_netrw_behavior = "open_current",
+        group_empty_dirs = false,
+        hijack_netrw_behavior = "open_default",
+        use_libuv_file_watcher = true,
       },
-      -- Buffers configuration
       buffers = {
-        window = {
-          mappings = {
-            ["bd"] = "buffer_delete",
-            ["<bs>"] = "navigate_up",
-            ["."] = "set_root",
-          },
-        },
         follow_current_file = {
           enabled = true,
+          leave_dirs_open = false,
         },
+        group_empty_dirs = false,
+        show_hidden = true,
       },
-      -- Git status configuration
       git_status = {
         window = {
+          position = "right",
+          width = 40,
           mappings = {
-            ["A"] = "git_add_all",
-            ["gu"] = "git_unstage_file",
-            ["ga"] = "git_add_file",
-            ["gr"] = "git_revert_file",
-            ["gc"] = "git_commit",
-            ["gp"] = "git_push",
-            ["gf"] = "git_fetch",
+            ["<cr>"] = "open",
+            ["s"] = "open_split",
+            ["S"] = "open_vsplit",
+            ["R"] = "refresh",
+            ["?"] = "show_help",
           },
         },
       },
-      -- Document symbols configuration
       document_symbols = {
-        kinds = {
-          File = " ",
-          Module = " ",
-          Namespace = " ",
-          Package = " ",
-          Class = "ﴯ ",
-          Method = "ƒ ",
-          Property = " ",
-          Field = " ",
-          Constructor = " ",
-          Enum = " ",
-          Interface = " ",
-          Function = " ",
-          Variable = " ",
-          Constant = "ﲁ ",
-          String = "𝓈 ",
-          Number = " ",
-          Boolean = "◩ ",
-          Array = " ",
-          Object = "⦿ ",
-          Key = " ",
-          Null = "NULL ",
-          EnumMember = " ",
-          Struct = " ",
-          Event = " ",
-          Operator = " ",
-          TypeParameter = " ",
+        follow_cursor = true,
+        custom_kinds = {},
+      },
+      default_component_configs = {
+        indent = {
+          with_markers = true,
+          with_expanders = true,
+          expander_collapsed = "",
+          expander_expanded = "",
+          expander_highlight = "NeoTreeExpander",
+        },
+        icon = {
+          folder_closed = "",
+          folder_open = "",
+          folder_empty = "ﰊ",
+          default = "",
+          highlight = "NeoTreeFileIcon",
+        },
+        name = {
+          trailing_slash = false,
+          use_git_status_colors = true,
+          highlight = "NeoTreeFileName",
+        },
+        git_status = {
+          symbols = {
+            added = "✚",
+            modified = "",
+            deleted = "✖",
+            renamed = "",
+            untracked = "★",
+            ignored = "◌",
+            unstaged = " ",
+            staged = "✓",
+            conflict = "",
+          },
         },
       },
-      -- Event handling
-      event_handlers = {
-        {
-          event = "file_opened",
-          handler = function(file_path)
-            require("neo-tree.command").execute({ action = "close" })
-          end,
-        },
+      buffers_color = {
+        modified = { fg = "warning" },
+        default = "Normal",
+        directory = "NeoTreeDirectory",
       },
     })
-
-    -- Keybinding to toggle neo-tree
-    vim.keymap.set("n", "<C-n>", ":Neotree filesystem reveal left<CR>", { desc = "Toggle file explorer" })
-    vim.keymap.set("n", "<leader>n", ":Neotree filesystem reveal left<CR>", { desc = "Toggle file explorer" })
-    vim.keymap.set("n", "<leader>nt", ":Neotree filesystem reveal left<CR>", { desc = "Toggle file explorer" })
-    vim.keymap.set("n", "<leader>nb", ":Neotree buffers reveal left<CR>", { desc = "Toggle buffer explorer" })
-    vim.keymap.set("n", "<leader>ng", ":Neotree git_status reveal left<CR>", { desc = "Toggle git status" })
-    vim.keymap.set("n", "<leader>ns", ":Neotree document_symbols reveal left<CR>", { desc = "Toggle document symbols" })
   end,
 }

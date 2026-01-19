@@ -3,6 +3,9 @@ return {
 		"hrsh7th/cmp-nvim-lsp",
 	},
 	{
+		"hrsh7th/cmp-buffer",
+	},
+	{
 		"L3MON4D3/LuaSnip",
 		dependencies = {
 			"saadparwaiz1/cmp_luasnip",
@@ -10,25 +13,27 @@ return {
 		},
 		config = function()
 			local ls = require("luasnip")
-			local s = ls.snippet
-			local t = ls.text_node
-			local i = ls.insert_node
-			local d = ls.dynamic_node
-			local c = ls.choice_node
-			local f = ls.function_node
-			local sn = ls.snippet_node
-
+			-- Load friendly snippets
+			require("luasnip.loaders.from_vscode").lazy_load({
+				exclude = {},
+			})
+			
+			-- Add custom snippets
 			ls.add_snippets("all", {
-			  s("hello", {
-			    t("Hello, "),
-			    i(1, "world"),
-			    t("!"),
-			  }),
-			  s("date", {
-			    f(function()
-			      return os.date("%Y-%m-%d")
-			    end, {}),
-			  }),
+				require("luasnip").snippet({
+					trig = "hello",
+				}, {
+					require("luasnip").text_node("Hello, "),
+					require("luasnip").insert_node(1, "world"),
+					require("luasnip").text_node("!"),
+				}),
+				require("luasnip").snippet({
+					trig = "date",
+				}, {
+					require("luasnip").function_node(function()
+						return os.date("%Y-%m-%d")
+					end, {}),
+				}),
 			})
 		end,
 	},
@@ -36,18 +41,11 @@ return {
 		"hrsh7th/nvim-cmp",
 		config = function()
 			local cmp = require("cmp")
-			require("luasnip.loaders.from_vscode").lazy_load({
-				exclude = {},
-			})
+			
 			cmp.setup({
 				snippet = {
-					-- REQUIRED - you must specify a snippet engine
 					expand = function(args)
-					  --	vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-						require("luasnip").lsp_expand(args.body) -- For `luasnip` users.
-						-- require('snippy').expand_snippet(args.body) -- For `snippy` users.
-						-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
-						-- vim.snippet.expand(args.body) -- For native neovim snippets (Neovim v0.10+)
+						require("luasnip").lsp_expand(args.body)
 					end,
 				},
 				window = {
@@ -59,17 +57,81 @@ return {
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
 					["<C-Space>"] = cmp.mapping.complete(),
 					["<C-e>"] = cmp.mapping.abort(),
-					["<CR>"] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+					["<CR>"] = cmp.mapping.confirm({ select = false }),
+					["<Tab>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_next_item()
+						else
+							fallback()
+						end
+					end, {
+						"i",
+						"s",
+					}),
+					["<S-Tab>"] = cmp.mapping(function(fallback)
+						if cmp.visible() then
+							cmp.select_prev_item()
+						else
+							fallback()
+						end
+					end, {
+						"i",
+						"s",
+					}),
 				}),
 				sources = cmp.config.sources({
 					{ name = "nvim_lsp" },
-					-- { name = "vsnip" }, -- For vsnip users.
-					{ name = "luasnip" }, -- For luasnip users.
-					-- { name = 'ultisnips' }, -- For ultisnips users.
-					-- { name = 'snippy' }, -- For snippy users.
+					{ name = "luasnip" },
 				}, {
 					{ name = "buffer" },
 				}),
+				formatting = {
+					fields = { cmp.ItemField.Kind, cmp.ItemField.Abbr, cmp.ItemField.Menu },
+					format = function(entry, vim_item)
+						-- Kind icons
+						local kind_icons = {
+							Text = "",
+							Method = "ƒ",
+							Function = "",
+							Constructor = "",
+							Field = "",
+							Variable = "",
+							Class = "",
+							Interface = "ﰮ",
+							Module = "",
+							Property = "",
+							Unit = "",
+							Value = "",
+							Enum = "练",
+							Keyword = "",
+							Snippet = "∐",
+							Color = "",
+							File = "",
+							Reference = "",
+							Folder = "",
+							EnumMember = "",
+							Constant = "",
+							Struct = "-struct",
+							Event = "",
+							Operator = "",
+							TypeParameter = "",
+						}
+						vim_item.kind = kind_icons[vim_item.kind] or vim_item.kind
+						vim_item.menu = entry.source.name
+						return vim_item
+					end,
+				},
+				sorting = {
+					priority_weight = 2,
+					comparators = {
+						cmp.config.compare.offset,
+						cmp.config.compare.exact,
+						cmp.config.compare.score,
+						cmp.config.compare.kind,
+						cmp.config.compare.length,
+						cmp.config.compare.order,
+					},
+				},
 			})
 		end,
 	},
