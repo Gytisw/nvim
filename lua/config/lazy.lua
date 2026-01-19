@@ -34,6 +34,10 @@ require("lazy").setup({
     -- LSP and Mason
     { import = "plugins.dap" },
     { import = "plugins.lsp" },
+    { import = "plugins.conform" },
+
+    -- Schema Store (JSON/YAML schemas)
+    { "b0o/schemastore.nvim" },
 
     -- Completion
     { import = "plugins.completions" },

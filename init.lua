@@ -1,3 +1,5 @@
-os.execute("export PATH=$PATH:/data/data/com.termux/files/home/.local/share/nvim/mason/bin/")
+-- Neovim Configuration
+-- Main entry point that loads all configuration modules
+
 require("config.options")
 require("config.lazy")

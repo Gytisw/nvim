@@ -4,39 +4,39 @@ return {
   config = function()
     local null_ls = require("null-ls")
 
-    local augroup = vim.api.nvim_create_augroup("NullLs", {})
+    local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
+
+    local sources = {
+      null_ls.builtins.diagnostics.pylint.with({
+        condition = function(utils)
+          return utils.root_has_file(".pylintrc") or utils.root_has_file("pyproject.toml")
+        end,
+      }),
+      null_ls.builtins.diagnostics.eslint_d.with({
+        condition = function(utils)
+          return utils.root_has_file(".eslintrc") or utils.root_has_file("package.json")
+        end,
+      }),
+      null_ls.builtins.diagnostics.luacheck.with({
+        condition = function(utils)
+          return utils.root_has_file(".luacheckrc")
+        end,
+      }),
+      null_ls.builtins.diagnostics.markdownlint.with({
+        condition = function(utils)
+          return utils.root_has_file(".markdownlint.json")
+        end,
+      }),
+      null_ls.builtins.diagnostics.yamllint.with({
+        condition = function(utils)
+          return utils.root_has_file(".yamllint") or utils.root_has_file(".yamllint.yml")
+        end,
+      }),
+    }
 
     null_ls.setup({
-      sources = {
-        -- Formatting
-        null_ls.builtins.formatting.stylua,
-        null_ls.builtins.formatting.prettier,
-        null_ls.builtins.formatting.black,
-        null_ls.builtins.formatting.isort,
-        null_ls.builtins.formatting.clang_format,
-        null_ls.builtins.formatting.gofmt,
-        null_ls.builtins.formatting.rustfmt,
-
-        -- Diagnostics
-        null_ls.builtins.diagnostics.pylint,
-        null_ls.builtins.diagnostics.eslint_d,
-        null_ls.builtins.diagnostics.luacheck,
-        null_ls.builtins.diagnostics.markdownlint,
-        null_ls.builtins.diagnostics.yamllint,
-      },
-      on_attach = function(client, bufnr)
-        if client.supports_method("textDocument/formatting") then
-          vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-          vim.api.nvim_create_autocmd("BufWritePre", {
-            group = augroup,
-            buffer = bufnr,
-            callback = function()
-              vim.lsp.buf.format({ bufnr = bufnr, async = true })
-            end,
-          })
-        end
-      end,
+      sources = sources,
+      debug = false,
     })
-    -- REMOVED: <leader>gf - format is now <leader>cf in which.lua
   end,
 }
