@@ -13,23 +13,25 @@ return {
             package_uninstalled = "✗",
           },
         },
-        -- On Termux, disable automatic updates/checks
+        -- On Termux, disable automatic installation checks
         automatic_installation = not is_termux,
       })
     end,
   },
   {
     "williamboman/mason-lspconfig.nvim",
-    -- Completely skip loading on Termux
-    cond = function()
-      local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
-      local is_android = vim.loop.os_uname().sysname == "Android"
-      return not is_termux and not is_android
-    end,
     config = function()
-      require("mason-lspconfig").setup({
-        automatic_installation = true,
-        ensure_installed = {
+      -- Detect Termux
+      local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
+      
+      local setup_opts = {
+        -- Always auto-match LSPs to available servers, but don't auto-install
+        automatic_installation = false,
+      }
+      
+      -- Only auto-install on desktop (non-Termux)
+      if not is_termux then
+        setup_opts.ensure_installed = {
           "lua_ls",
           "clangd",
           "pyright",
@@ -41,17 +43,15 @@ return {
           "bashls",
           "cssls",
           "html",
-        },
-      })
+        }
+      end
+      
+      require("mason-lspconfig").setup(setup_opts)
     end,
   },
   {
     "neovim/nvim-lspconfig",
-    cond = function()
-      local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
-      local is_android = vim.loop.os_uname().sysname == "Android"
-      return not is_termux and not is_android
-    end,
+    dependencies = { "williamboman/mason-lspconfig.nvim" },
     config = function()
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
       
