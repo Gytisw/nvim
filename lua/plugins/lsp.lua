@@ -194,7 +194,22 @@ return {
 
       vim.lsp.config("bashls", {
         capabilities = capabilities,
+        cmd = { "/opt/homebrew/bin/bash-language-server", "start" },
         filetypes = { "bash", "sh", "zsh" },
+        root_dir = function(fname)
+          if type(fname) ~= "string" or fname == "" then
+            return vim.fn.getcwd()
+          end
+          local ok, git_dir = pcall(vim.fs.find, ".git", { path = vim.fs.dirname(fname), upward = true })
+          if not ok or type(git_dir) ~= "table" or #git_dir == 0 then
+            return vim.fs.dirname(fname) or vim.fn.getcwd()
+          end
+          local root = git_dir[1]
+          if type(root) == "string" and root ~= "" then
+            return vim.fs.dirname(root) or vim.fn.getcwd()
+          end
+          return vim.fs.dirname(fname) or vim.fn.getcwd()
+        end,
       })
 
       vim.lsp.config("cssls", {
@@ -231,6 +246,72 @@ return {
         "bashls",
         "cssls",
         "html",
+      })
+
+      -- LSP server configurations by filetype
+      local ft_to_lsp = {
+        lua = "lua_ls",
+        python = "pyright",
+        typescript = "ts_ls",
+        javascript = "ts_ls",
+        typescriptreact = "ts_ls",
+        javascriptreact = "ts_ls",
+        rust = "rust_analyzer",
+        go = "gopls",
+        c = "clangd",
+        cpp = "clangd",
+        json = "jsonls",
+        jsonc = "jsonls",
+        yaml = "yamlls",
+        bash = "bashls",
+        sh = "bashls",
+        zsh = "bashls",
+        css = "cssls",
+        scss = "cssls",
+        less = "cssls",
+        html = "html",
+      }
+
+      -- Auto-attach LSP clients to matching buffers
+      vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
+        group = vim.api.nvim_create_augroup("LspAutoAttach", { clear = true }),
+        callback = function(args)
+          local bufnr = args.buf
+          local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
+          local server_name = ft_to_lsp[filetype]
+
+          if not server_name then
+            return
+          end
+
+          -- Check if this LSP is already running
+          for _, client in ipairs(vim.lsp.get_clients() or {}) do
+            if client.name == server_name then
+              -- Already running, just attach to this buffer (triggers LspAttach)
+              vim.lsp.buf_attach_client(bufnr, client)
+              return
+            end
+          end
+
+          -- Get the server config
+          local config = vim.lsp.config[server_name]
+          if not config then
+            return
+          end
+
+          -- Start the LSP server and attach to buffer
+          local bufname = vim.api.nvim_buf_get_name(bufnr)
+          local client = vim.lsp.start({
+            name = server_name,
+            cmd = config.cmd,
+            root_dir = config.root_dir and config.root_dir(bufname) or vim.fn.getcwd(),
+          })
+
+          -- Attach the client to this buffer (this triggers LspAttach autocmd)
+          if client then
+            vim.lsp.buf_attach_client(bufnr, client)
+          end
+        end,
       })
 
       vim.api.nvim_create_autocmd("LspAttach", {
