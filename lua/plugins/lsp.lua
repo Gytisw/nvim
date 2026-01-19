@@ -16,9 +16,16 @@ return {
   {
     "williamboman/mason-lspconfig.nvim",
     config = function()
-      require("mason-lspconfig").setup({
+      -- Detect platform - only auto-install on macOS
+      local is_android = vim.loop.os_uname().sysname == "Android" or vim.env.TERMUX == "1"
+      
+      local setup_opts = {
         automatic_installation = true,
-        ensure_installed = {
+      }
+      
+      -- Only auto-install LSPs on macOS, not on Android/Termux
+      if not is_android then
+        setup_opts.ensure_installed = {
           "lua_ls",      -- Lua Language Server
           "clangd",      -- C/C++
           "pyright",     -- Python
@@ -30,8 +37,14 @@ return {
           "bashls",      -- Bash
           "cssls",       -- CSS
           "html",        -- HTML
-        },
-      })
+        }
+      else
+        -- On Android, skip auto-installation entirely
+        setup_opts.automatic_installation = false
+        setup_opts.ensure_installed = {}
+      end
+      
+      require("mason-lspconfig").setup(setup_opts)
     end,
   },
   {
@@ -92,10 +105,6 @@ return {
       })
 
       -- Configure LSP servers using vim.lsp.config (new API)
-      -- Note: Use vim.lsp.config.server_name for pre-configuration
-      -- Then require("lspconfig") at the end to load them all
-      
-      -- Lua LS
       vim.lsp.config.lua_ls = {
         on_attach = on_attach,
         capabilities = capabilities,
@@ -118,14 +127,12 @@ return {
         },
       }
 
-      -- Clangd
       vim.lsp.config.clangd = {
         on_attach = on_attach,
         capabilities = capabilities,
         cmd = { "clangd" },
       }
 
-      -- Pyright
       vim.lsp.config.pyright = {
         on_attach = on_attach,
         capabilities = capabilities,
@@ -141,7 +148,6 @@ return {
         },
       }
 
-      -- TypeScript
       vim.lsp.config.ts_ls = {
         on_attach = on_attach,
         capabilities = capabilities,
@@ -155,7 +161,6 @@ return {
         },
       }
 
-      -- Rust Analyzer (note: use rust_analyzer for Mason, but config key is rust_analyzer)
       vim.lsp.config.rust_analyzer = {
         on_attach = on_attach,
         capabilities = capabilities,
@@ -177,7 +182,6 @@ return {
         },
       }
 
-      -- Go
       vim.lsp.config.gopls = {
         on_attach = on_attach,
         capabilities = capabilities,
@@ -192,38 +196,30 @@ return {
         },
       }
 
-      -- JSON
       vim.lsp.config.jsonls = {
         on_attach = on_attach,
         capabilities = capabilities,
       }
       
-      -- YAML
       vim.lsp.config.yamlls = {
         on_attach = on_attach,
         capabilities = capabilities,
       }
       
-      -- Bash
       vim.lsp.config.bashls = {
         on_attach = on_attach,
         capabilities = capabilities,
       }
       
-      -- CSS
       vim.lsp.config.cssls = {
         on_attach = on_attach,
         capabilities = capabilities,
       }
       
-      -- HTML
       vim.lsp.config.html = {
         on_attach = on_attach,
         capabilities = capabilities,
       }
-
-      -- IMPORTANT: This loads all the servers configured above
-      -- Uses vim.lsp.config internally, no need to require("lspconfig")
     end,
   },
 }
