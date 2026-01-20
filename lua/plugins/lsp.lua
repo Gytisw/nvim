@@ -51,10 +51,40 @@ return {
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
       local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
+      local termux_prefix = is_termux and vim.env.PREFIX or nil
 
-      local cmd_clangd = is_termux and nil or { "clangd" }
-      local cmd_rust_analyzer = is_termux and nil or { "rust-analyzer" }
+      -- Helper function to create LSP command with proper environment for Termux
+      local function create_lsp_cmd(executable, args, env_overrides)
+        local cmd_table = { executable }
+        if args then
+          for _, arg in ipairs(args) do
+            table.insert(cmd_table, arg)
+          end
+        end
 
+        local cmd_env = nil
+        if is_termux and termux_prefix then
+          -- Set up environment for Termux execution
+          cmd_env = {
+            LD_PRELOAD = termux_prefix .. "/lib/libtermux-exec.so",
+            PATH = termux_prefix .. "/bin:" .. termux_prefix .. "/usr/bin:" .. (os.getenv("PATH") or ""),
+          }
+
+          -- Merge any additional environment overrides
+          if env_overrides then
+            for key, value in pairs(env_overrides) do
+              cmd_env[key] = value
+            end
+          end
+        end
+
+        return {
+          cmd = cmd_table,
+          cmd_env = cmd_env,
+        }
+      end
+
+      -- Diagnostic signs configuration
       vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
       vim.fn.sign_define("DiagnosticSignWarn", { text = " ", texthl = "DiagnosticSignWarn" })
       vim.fn.sign_define("DiagnosticSignHint", { text = " ", texthl = "DiagnosticSignHint" })
@@ -82,8 +112,12 @@ return {
         severity_sort = true,
       })
 
+      -- lua_ls configuration - cross-platform
+      local lua_ls_setup = create_lsp_cmd("lua-language-server", { "--stdio" })
       vim.lsp.config("lua_ls", {
         capabilities = capabilities,
+        cmd = lua_ls_setup.cmd,
+        cmd_env = lua_ls_setup.cmd_env,
         settings = {
           Lua = {
             diagnostics = {
@@ -103,14 +137,21 @@ return {
         },
       })
 
+      -- clangd configuration
+      local clangd_setup = create_lsp_cmd("clangd", { "--offset-encoding=utf-16" })
       vim.lsp.config("clangd", {
         capabilities = capabilities,
-        cmd = cmd_clangd,
+        cmd = clangd_setup.cmd,
+        cmd_env = clangd_setup.cmd_env,
         offset_encoding = "utf-16",
       })
 
+      -- pyright configuration
+      local pyright_setup = create_lsp_cmd("pyright-langserver", { "--stdio" })
       vim.lsp.config("pyright", {
         capabilities = capabilities,
+        cmd = pyright_setup.cmd,
+        cmd_env = pyright_setup.cmd_env,
         settings = {
           pyright = {
             disableOrganizeImports = false,
@@ -123,8 +164,12 @@ return {
         },
       })
 
+      -- ts_ls configuration
+      local ts_ls_setup = create_lsp_cmd("typescript-language-server", { "--stdio" })
       vim.lsp.config("ts_ls", {
         capabilities = capabilities,
+        cmd = ts_ls_setup.cmd,
+        cmd_env = ts_ls_setup.cmd_env,
         settings = {
           typescript = {
             format = { indentSize = 2, semicolons = true },
@@ -135,9 +180,12 @@ return {
         },
       })
 
+      -- rust_analyzer configuration
+      local rust_setup = create_lsp_cmd("rust-analyzer", nil)
       vim.lsp.config("rust_analyzer", {
         capabilities = capabilities,
-        cmd = cmd_rust_analyzer,
+        cmd = rust_setup.cmd,
+        cmd_env = rust_setup.cmd_env,
         settings = {
           ["rust-analyzer"] = {
             cargo = {
@@ -156,8 +204,12 @@ return {
         },
       })
 
+      -- gopls configuration
+      local gopls_setup = create_lsp_cmd("gopls", { "serve" })
       vim.lsp.config("gopls", {
         capabilities = capabilities,
+        cmd = gopls_setup.cmd,
+        cmd_env = gopls_setup.cmd_env,
         settings = {
           gopls = {
             gofumpt = true,
@@ -169,8 +221,12 @@ return {
         },
       })
 
+      -- jsonls configuration
+      local jsonls_setup = create_lsp_cmd("json-language-server", { "--stdio" })
       vim.lsp.config("jsonls", {
         capabilities = capabilities,
+        cmd = jsonls_setup.cmd,
+        cmd_env = jsonls_setup.cmd_env,
         filetypes = { "json", "jsonc" },
         settings = {
           json = {
@@ -182,8 +238,12 @@ return {
         },
       })
 
+      -- yamlls configuration
+      local yamlls_setup = create_lsp_cmd("yaml-language-server", { "--stdio" })
       vim.lsp.config("yamlls", {
         capabilities = capabilities,
+        cmd = yamlls_setup.cmd,
+        cmd_env = yamlls_setup.cmd_env,
         settings = {
           yaml = {
             schemas = require("schemastore").yaml.schemas(),
@@ -192,9 +252,41 @@ return {
         },
       })
 
+      -- bashls configuration - cross-platform with path detection
+      local bashls_setup
+      if is_termux and termux_prefix then
+        -- On Termux, use PREFIX/bin path
+        bashls_setup = create_lsp_cmd(termux_prefix .. "/bin/bash-language-server", { "start" })
+      else
+        -- On macOS/Linux, try multiple standard locations
+        local bashls_paths = {
+          "/opt/homebrew/bin/bash-language-server", -- Homebrew on Apple Silicon
+          "/usr/local/bin/bash-language-server", -- Homebrew on Intel or system
+          "bash-language-server", -- PATH lookup
+        }
+
+        local found_path = nil
+        for _, path in ipairs(bashls_paths) do
+          if path == "bash-language-server" then
+            if vim.fn.executable(path) == 1 then
+              found_path = path
+              break
+            end
+          else
+            if vim.fn.filereadable(path) == 1 then
+              found_path = path
+              break
+            end
+          end
+        end
+
+        bashls_setup = create_lsp_cmd(found_path or "bash-language-server", { "start" })
+      end
+
       vim.lsp.config("bashls", {
         capabilities = capabilities,
-        cmd = { "/opt/homebrew/bin/bash-language-server", "start" },
+        cmd = bashls_setup.cmd,
+        cmd_env = bashls_setup.cmd_env,
         filetypes = { "bash", "sh", "zsh" },
         root_dir = function(fname)
           if type(fname) ~= "string" or fname == "" then
@@ -212,8 +304,12 @@ return {
         end,
       })
 
+      -- cssls configuration
+      local cssls_setup = create_lsp_cmd("css-language-server", { "--stdio" })
       vim.lsp.config("cssls", {
         capabilities = capabilities,
+        cmd = cssls_setup.cmd,
+        cmd_env = cssls_setup.cmd_env,
         filetypes = { "css", "scss", "less" },
         settings = {
           css = {
@@ -222,8 +318,12 @@ return {
         },
       })
 
+      -- html configuration
+      local html_setup = create_lsp_cmd("html-language-server", { "--stdio" })
       vim.lsp.config("html", {
         capabilities = capabilities,
+        cmd = html_setup.cmd,
+        cmd_env = html_setup.cmd_env,
         filetypes = { "html", "htmldjango" },
         settings = {
           html = {
@@ -304,6 +404,7 @@ return {
           local client = vim.lsp.start({
             name = server_name,
             cmd = config.cmd,
+            cmd_env = config.cmd_env,
             root_dir = config.root_dir and config.root_dir(bufname) or vim.fn.getcwd(),
           })
 
