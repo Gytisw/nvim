@@ -27,13 +27,13 @@
 ║                           ESSENTIAL SHORTCUTS                                     ║
 ╠═══════════════════════════════════════════════════════════════════════════════════╣
 ║  <leader>ff   → 🔍 Search files          <C-p>   → 🔍 Quick file search          ║
-║  <leader>fg   → 📝 Live grep             <leader>n → 📁 Toggle explorer          ║
+║  <leader>fg   → 📝 Live grep             <C-n>   → 📁 Toggle explorer            ║
 ║  <leader><sp> → 📂 Recent files          <Tab>   → AI/Complete accept            ║
 ║  gd           → → Go to definition       K       → 💭 Hover docs                 ║
-║  gcc          → 💬 Comment toggle        ]c/[c]   → Git hunk nav                 ║
-║  <leader>t    → 📦 Terminal toggle       <C-w>w  → Next window                   ║
-║  <leader>x    → ⚠️ Trouble toggle        <leader> → Show all bindings            ║
-║  <leader>TT   → 🎨 Change theme          <leader>oo → 📄 New tab                  ║
+║  gcc          → 💬 Comment toggle        ]c/[c   → Git hunk nav                  ║
+║  <leader>tt   → 📦 Terminal toggle       <C-w>w  → Next window                   ║
+║  <leader>xx   → ⚠️ Trouble diagnostics   <leader>→ Show all bindings             ║
+║  <leader>TT   → 🎨 Change theme          <leader>oo → 📄 New tab                 ║
 ╚═══════════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -45,12 +45,11 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 
 | Keybinding | Mode | Description |
 |------------|------|-------------|
-| `<leader>n` | n | Toggle file explorer |
-| `<leader>nt` | n | Toggle file explorer |
-| `<C-n>` | n | Toggle file explorer (alternative) |
-| `<leader>nb` | n | Toggle buffer explorer |
-| `<leader>ng` | n | Toggle git status |
-| `<leader>ns` | n | Toggle document symbols |
+| `<leader>nt` | n | 📁 Toggle file explorer |
+| `<C-n>` | n | 📁 Toggle file explorer (alternative) |
+| `<leader>nb` | n | 📑 Toggle buffer explorer |
+| `<leader>ng` | n | 📊 Toggle git status |
+| `<leader>ns` | n | 🏷️ Toggle document symbols |
 
 ### Neo-tree Navigation
 
@@ -64,8 +63,8 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 | `H` | Toggle hidden files |
 | `/` | Fuzzy filter |
 | `<C-c>` | Clear filter |
-| `a` | Add directory |
-| `A` | Add file |
+| `a` | Add file |
+| `A` | Add directory |
 | `d` | Delete file/directory |
 | `r` | Rename file/directory |
 | `y` | Copy to clipboard |
@@ -107,7 +106,7 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 | Keybinding | Mode | Description |
 |------------|------|-------------|
 | `<leader>oo` | n | 📄 New tab |
-| `<leader>oc` | n | ❌ Close tab |
+| `<leader>oc` | n | ❌ Close tab (bdelete if last) |
 | `<leader>on` | n | ➡️ Next tab |
 | `<leader>op` | n | ⬅️ Previous tab |
 | `<leader>of` | n | ⏮️ First tab |
@@ -137,17 +136,17 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 | Keybinding | Mode | Description |
 |------------|------|-------------|
 | `<C-w>w` | n | Cycle windows |
-| `<C-w>h` | n | Window left |
-| `<C-w>j` | n | Window down |
-| `<C-w>k` | n | Window up |
-| `<C-w>l` | n | Window right |
-| `<C-w>s` | n | Split horizontal |
-| `<C-w>v` | n | Split vertical |
-| `<C-w>q` | n | ❌ Close window |
-| `<C-w>o` | n | ❌ Close other windows |
-| `<C-w>=` | n | ⇔ Equal size |
-| `<C-w>_` | n | ⇕ Maximize height |
-| `<C-w>|` | n | ⇒ Maximize width |
+| `<C-w>h` / `<leader>wh` | n | Window left |
+| `<C-w>j` / `<leader>wj` | n | Window down |
+| `<C-w>k` / `<leader>wk` | n | Window up |
+| `<C-w>l` / `<leader>wl` | n | Window right |
+| `<C-w>s` / `<leader>ws` | n | Split horizontal |
+| `<C-w>v` / `<leader>wv` | n | Split vertical |
+| `<C-w>q` / `<leader>wq` | n | ❌ Close window |
+| `<C-w>o` / `<leader>wo` | n | ❌ Close other windows |
+| `<C-w>=` / `<leader>w=` | n | ⇔ Equal size |
+| `<C-w>_` / `<leader>w_` | n | ⇕ Maximize height |
+| `<C-w>|` / `<leader>w|` | n | ⇒ Maximize width |
 
 ---
 
@@ -155,10 +154,10 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 
 | Keybinding | Mode | Description |
 |------------|------|-------------|
-| `]c` | n | Next hunk |
-| `[c` | n | Previous hunk |
+| `]c` | n | ➡️ Next hunk |
+| `[c` | n | ⬅️ Previous hunk |
 | `<leader>hs` | n | + Stage git hunk |
-| `<leader>hr` | n | - Undo git hunk |
+| `<leader>hr` | n | - Reset git hunk |
 | `<leader>hS` | n | ++ Stage all hunks |
 | `<leader>hu` | n | ↩️ Undo stage |
 | `<leader>hR` | n | ⟲ Reset buffer |
@@ -171,18 +170,15 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 
 ---
 
-## ⚠️ Trouble (Diagnostics)
+## ⚠️ Trouble v3 (Diagnostics)
 
 | Keybinding | Mode | Description |
 |------------|------|-------------|
-| `<leader>x` | n | Toggle trouble menu |
-| `<leader>xx` | n | ⚠️ Toggle trouble list |
-| `<leader>xw` | n | ⚠️ Workspace diagnostics |
-| `<leader>xd` | n | ⚠️ Document diagnostics |
-| `<leader>xq` | n | 📋 Quickfix list |
-| `<leader>xl` | n | 📍 Location list |
-| `]x` | n | ➡️ Next trouble item |
-| `[x` | n | ⬅️ Previous trouble item |
+| `<leader>xx` | n | ⚠️ Toggle workspace diagnostics |
+| `<leader>xX` | n | ⚠️ Toggle buffer diagnostics |
+| `<leader>xs` | n | 🏷️ Toggle document symbols |
+| `<leader>xq` | n | 📋 Toggle quickfix list |
+| `<leader>xl` | n | 📍 Toggle location list |
 
 ### Trouble Navigation
 
@@ -192,9 +188,18 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 | `o` | Jump and close |
 | `<C-s>` | Open in split |
 | `<C-v>` | Open in vsplit |
-| `<C-t>` | Open in tab |
 | `q` | Close trouble |
 | `r` | Refresh |
+
+### Trouble Commands
+
+```vim
+:Trouble diagnostics toggle              " Workspace diagnostics
+:Trouble diagnostics toggle filter.buf=0 " Buffer diagnostics only
+:Trouble symbols toggle                  " Document symbols
+:Trouble qflist toggle                   " Quickfix list
+:Trouble loclist toggle                  " Location list
+```
 
 ---
 
@@ -257,12 +262,20 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 | `gr` | n | → Find references |
 | `K` | n | 💭 Hover documentation |
 | `<leader>ca` | n | 💡 Code actions |
-| `<leader>cr` | n | 📝 Rename symbol |
-| `<leader>cd` | n | 💬 Show diagnostics |
-| `<leader>cD` | n | 🔍 Find diagnostics |
+| `<leader>rn` | n | 📝 Rename symbol |
+| `<leader>cd` | n | 💬 Show diagnostics float |
+| `<leader>cD` | n | 🔍 Find diagnostics (Telescope) |
 | `<leader>cf` | n | 🎨 Format code |
 | `[d` | n | ⬅️ Previous diagnostic |
 | `]d` | n | ➡️ Next diagnostic |
+
+### LSP Commands
+
+```vim
+:LspStatus            " Show available LSP servers
+:LspInfo              " Show attached clients
+:LspRestart           " Restart attached clients
+```
 
 ---
 
@@ -285,16 +298,15 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 | `<M-]>` | i | Next suggestion |
 | `<M-[>` | i | Previous suggestion |
 | `<C-]>` | i | Dismiss suggestion |
-| `<leader>lb` | n | 🤖 Bropilot panel |
+| `<leader>lb` | n | 🤖 Toggle Bropilot |
 
 ### gp.nvim (LLM Chat)
 
 | Keybinding | Mode | Description |
 |------------|------|-------------|
-| `<leader>lc` | n | 💬 New AI chat |
-| `<leader>ld` | n | 📎 Toggle AI chat |
-| `<leader>lr` | n | ↩️ Respond to chat |
-| `<C-Enter>` | i | Send message |
+| `<leader>lgc` | n | 💬 New AI chat |
+| `<leader>lgt` | n | 📎 Toggle AI chat |
+| `<leader>lgr` | n | ↩️ Respond to chat |
 
 ---
 
@@ -316,15 +328,6 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 | `<leader>TT` | n | 🎨 Change color scheme |
 | `<leader>Tt` | n | 🎨 Pick theme (Telescope) |
 
-### Theme Picker Navigation
-
-| Keybinding | Description |
-|------------|-------------|
-| `<CR>` | Apply selected theme |
-| `<C-c>` | Cancel |
-| `<C-n>` / `j` | Next theme |
-| `<C-p>` / `k` | Previous theme |
-
 ---
 
 ## 🚪 Quit & Session
@@ -335,7 +338,6 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 | `<leader>qw` | n | 🚪 Force quit all |
 | `<leader>qs` | n | 💾 Save session |
 | `<leader>ql` | n | 📂 Load session |
-| `<leader>qd` | n | 📂 Toggle session |
 
 ---
 
@@ -351,6 +353,21 @@ Press `<leader>` to see ALL keybindings in a popup menu!
 | `ib` | o/v | Inside block |
 | `aa` | o/v | Around parameter |
 | `ia` | o/v | Inside parameter |
+| `al` | o/v | Around loop |
+| `il` | o/v | Inside loop |
+
+### Treesitter Navigation
+
+| Keybinding | Mode | Description |
+|------------|------|-------------|
+| `]m` | n | Next function start |
+| `]M` | n | Next function end |
+| `[m` | n | Previous function start |
+| `[M` | n | Previous function end |
+| `]]` | n | Next class start |
+| `][` | n | Next class end |
+| `[[` | n | Previous class start |
+| `[]` | n | Previous class end |
 
 ---
 
@@ -380,7 +397,6 @@ cs"'          → 'word'
 | Keybinding | Mode | Description |
 |------------|------|-------------|
 | `<leader>aa` | n | Select all |
-| `<leader>ab` | n | Select buffer content |
 | `<leader>ac` | n | 🔍 Find commands |
 | `<leader>ak` | n | 🔍 Find keymaps |
 | `<leader>am` | n | 🔍 Find marks |
@@ -393,23 +409,13 @@ cs"'          → 'word'
 
 ## 📝 Editing
 
-### Insert Mode
+### Undo/Redo
 
 | Keybinding | Mode | Description |
 |------------|------|-------------|
-| `i` | n | Insert before cursor |
-| `I` | n | Insert at line start |
-| `a` | n | Insert after cursor |
-| `A` | n | Insert at line end |
-| `o` | n | Insert new line below |
-| `O` | n | Insert new line above |
-| `<C-h>` | i | Delete character before |
-| `<C-w>` | i | Delete word before |
-| `<C-u>` | i | Delete line before |
-| `<C-j>` | i | Insert newline |
-| `<C-t>` | i | Indent current line |
-| `<C-d>` | i | De-indent current line |
-| `<Esc>` | i | Exit insert mode |
+| `u` | n | ↩️ Undo |
+| `<C-r>` | n | ↪️ Redo |
+| `U` | n | ↪️ Redo (uppercase alias) |
 
 ### Yank/Paste
 
@@ -420,42 +426,54 @@ cs"'          → 'word'
 | `Y` | n | Yank to end of line |
 | `p` | n | Paste after cursor |
 | `P` | n | Paste before cursor |
-| `gp` | n | Paste and put cursor after |
-| `gP` | n | Paste and put cursor before |
 
-### Delete/Change
+### Completion (nvim-cmp)
 
 | Keybinding | Mode | Description |
 |------------|------|-------------|
-| `x` | v/n | Delete character |
-| `d` | v/n | Delete selection |
-| `dd` | n | Delete line |
-| `D` | n | Delete to end of line |
-| `diw` | n | Delete inner word |
-| `daw` | n | Delete a word |
-| `c` | v/n | Change selection |
-| `cc` | n | Change line |
-| `C` | n | Change to end of line |
-
-### Undo/Redo
-
-| Keybinding | Mode | Description |
-|------------|------|-------------|
-| `u` | n | ↩️ Undo |
-| `<C-r>` | n | ↪️ Redo |
-| `U` | n | Undo whole line |
+| `<C-Space>` | i | ✨ Trigger completion |
+| `<CR>` | i | ✓ Confirm selection |
+| `<C-e>` | i | ✕ Abort completion |
+| `<Tab>` | i | Next item / Expand snippet |
+| `<S-Tab>` | i | Previous item |
+| `<C-b>` | i | Scroll docs up |
+| `<C-f>` | i | Scroll docs down |
 
 ---
 
-## 🖱️ Which-Key
+## 🔑 Leader Key Map
 
-| Keybinding | Description |
-|------------|-------------|
-| `<leader>` | Show all leader keybindings |
-| `<leader><leader>` | Show more bindings |
-| `<leader>?` | Show buffer-local bindings |
-| `g` | Show g-prefixed bindings |
-| `z` | Show z-prefixed bindings |
+| Prefix | Category | Keybindings |
+|--------|----------|-------------|
+| `<leader>f` | Find/Telescope | ff, fg, fb, fh, fp |
+| `<leader>n` | Neo-tree | nt, nb, ng, ns |
+| `<leader>h` | Git Hunk | hs, hr, hS, hu, hR, hp, hd, hD, hb, hT |
+| `<leader>x` | Trouble | xx, xX, xs, xq, xl |
+| `<leader>c` | Code/LSP | ca, cd, cD, cf |
+| `<leader>l` | AI/LLM | lb, lgc, lgt, lgr |
+| `<leader>T` | Theme/UI | TT, Tt |
+| `<leader>D` | Debug | Dt, Dc, Do, Di, Du, Dr, Dl, Dw, De, Db, Dp |
+| `<leader>t` | Terminal | tt, tf, th, tv |
+| `<leader>b` | Buffer | bd, bD, bn, bp, bf, bl, bs |
+| `<leader>w` | Window | wh, wj, wk, wl, ws, wv, wq, wo |
+| `<leader>o` | Tabs | oo, oc, on, op, of, ol, om |
+| `<leader>td` | TODO Comments | tdt, tdn, tdp, tda |
+| `<leader>q` | Quit/Session | qq, qw, qs, ql |
+| `<leader>a` | Alternatives | aa, ac, ak, am |
+| `<leader>z` | Quick Actions | zz, zt, za, zi |
+| `<leader>rn` | Rename | LSP rename symbol |
+
+---
+
+## 📱 Termux Commands
+
+These commands are only available on Termux (Android):
+
+| Command | Description |
+|---------|-------------|
+| `:TermuxLspInstall` | Install all missing LSP servers |
+| `:TermuxLspStatus` | Show which LSPs are installed |
+| `:TermuxLspReset` | Re-enable the installation prompt |
 
 ---
 
@@ -467,34 +485,12 @@ cs"'          → 'word'
 4. **Use marks**: `m{a-z}` to set marks, `'{a-z}` to jump
 5. **Repeat with dot**: `.` repeats the last change
 6. **Registers**: `"ay` to yank to register a, `"ap` to paste from a
-7. **Tabs > Buffers**: Use tabs for distinct contexts, buffers for file switching
+7. **Check LSP status**: `:LspStatus` shows what's available
+8. **Trouble v3**: Use `:Trouble diagnostics toggle` for the new API
 
 ---
 
-## 🔑 Leader Key Map
-
-| Prefix | Category | Keybindings |
-|--------|----------|-------------|
-| `<leader>f` | Find/Telescope | ff, fg, fb, fh, fp |
-| `<leader>n` | Neo-tree | n, nt, nb, ng, ns |
-| `<leader>h` | Git Hunk | hs, hr, hS, hu, hR, hp, hd, hD, hb, hT |
-| `<leader>x` | Trouble | xx, xw, xd, xq, xl |
-| `<leader>c` | Code/LSP | ca, cr, cd, cD, cf |
-| `<leader>l` | AI/LLM | lc, ld, lr, lb, ll |
-| `<leader>T` | Theme/UI | TT, Tt |
-| `<leader>D` | Debug | Dt, Dc, Do, Di, Du, Dr, Dl, Dw, De, Db, Dp |
-| `<leader>t` | Terminal | tt, tf, th, tv |
-| `<leader>b` | Buffer | bd, bD, bn, bp, bf, bl, bs |
-| `<leader>w` | Window | wh, wj, wk, wl, ws, wv, wq, wo |
-| `<leader>o` | Tabs | oo, oc, on, op, of, ol, om |
-| `<leader>td` | TODO Comments | tdt, tdn, tdp, tda |
-| `<leader>q` | Quit/Session | qq, qw, qs, ql, qd |
-| `<leader>a` | Alternatives | aa, ab, ac, ak, am |
-| `<leader>z` | Quick Actions | zz, zt, za, zi |
-
----
-
-> special talent. I am only passionately curious *"I have no about Neovim keybindings."*
+> *"I have no special talent. I am only passionately curious about Neovim keybindings."*
 >
 > — Albert Einstein (probably)
 
@@ -502,4 +498,4 @@ cs"'          → 'word'
 
 **Happy Hacking!** 🚀
 
-*Last updated: January 2026 - Fixed keybinding conflicts, deprecation warnings, gp.lua setup, reorganized prefixes (<leader>D for Debug, <leader>o for Tabs, <leader>td for TODOs)*
+*Last updated: January 2026 - Updated for Trouble v3, Neovim 0.11 native LSP API, cross-platform support, Termux commands*
