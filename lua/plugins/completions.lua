@@ -94,7 +94,7 @@ return {
           { name = "buffer" },
         }),
         formatting = {
-          fields = { cmp.ItemField.Kind, cmp.ItemField.Abbr, cmp.ItemField.Menu },
+          fields = { "kind", "abbr", "menu" },
           format = function(entry, vim_item)
             local kind_icons = {
               Text = "",

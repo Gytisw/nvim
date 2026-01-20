@@ -47,7 +47,7 @@
   "telescope-dap.nvim": { "branch": "master", "commit": "783366bd6c1e7fa0a5c59c07db37f49c805a28df" },
   "telescope-project.nvim": { "branch": "master", "commit": "8e11df94419e444601c09828dadf70890484e443" },
   "telescope-ui-select.nvim": { "branch": "master", "commit": "6e51d7da30bd139a6950adf2a47fda6df9fa06d2" },
-  "telescope.nvim": { "branch": "master", "commit": "a8c2223ea6b185701090ccb1ebc7f4e41c4c9784" },
+  "telescope.nvim": { "branch": "master", "commit": "0d8b6eaa0b5ae6bb3d9785f7a3ba4a4c6c1b1af2" },
   "tender.vim": { "branch": "master", "commit": "b66dc330aff998dff9d44459d84bc1c5f4304fcc" },
   "todo-comments.nvim": { "branch": "main", "commit": "31e3c38ce9b29781e4422fc0322eb0a21f4e8668" },
   "toggleterm.nvim": { "branch": "main", "commit": "50ea089fc548917cc3cc16b46a8211833b9e3c7c" },

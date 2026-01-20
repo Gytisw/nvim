@@ -1,9 +1,79 @@
+-- Cross-platform LSP configuration
+-- Supports: macOS, Linux, Windows, Termux (Android)
+
+-- Platform detection
+local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
+local is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
+local termux_prefix = is_termux and vim.env.PREFIX or nil
+
+-- Mason bin directory
+local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+
+-- Find executable across multiple possible locations
+local function find_executable(candidates)
+  for _, candidate in ipairs(candidates) do
+    if vim.fn.executable(candidate) == 1 then
+      return candidate
+    end
+    -- Also check Mason bin explicitly
+    local mason_path = mason_bin .. "/" .. candidate
+    if vim.fn.executable(mason_path) == 1 then
+      return mason_path
+    end
+  end
+  return nil
+end
+
+-- LSP executable mappings: server_name -> { possible executables }
+local lsp_executables = {
+  lua_ls = { "lua-language-server" },
+  clangd = { "clangd" },
+  pyright = { "pyright-langserver" },
+  ts_ls = { "typescript-language-server" },
+  rust_analyzer = { "rust-analyzer" },
+  gopls = { "gopls" },
+  jsonls = { "vscode-json-language-server", "json-languageserver", "json-language-server" },
+  yamlls = { "yaml-language-server" },
+  bashls = { "bash-language-server" },
+  cssls = { "vscode-css-language-server", "css-languageserver", "css-language-server" },
+  html = { "vscode-html-language-server", "html-languageserver", "html-language-server" },
+}
+
+-- Create LSP command with proper environment
+local function create_lsp_cmd(server_name, args)
+  local candidates = lsp_executables[server_name] or { server_name }
+  local executable = find_executable(candidates)
+  
+  if not executable then
+    return nil
+  end
+  
+  local cmd_table = { executable }
+  if args then
+    for _, arg in ipairs(args) do
+      table.insert(cmd_table, arg)
+    end
+  end
+
+  local cmd_env = nil
+  if is_termux and termux_prefix then
+    cmd_env = {
+      LD_PRELOAD = termux_prefix .. "/lib/libtermux-exec.so",
+      PATH = termux_prefix .. "/bin:" .. termux_prefix .. "/usr/bin:" .. mason_bin .. ":" .. (os.getenv("PATH") or ""),
+    }
+  end
+
+  return {
+    cmd = cmd_table,
+    cmd_env = cmd_env,
+    executable = executable,
+  }
+end
+
 return {
   {
     "williamboman/mason.nvim",
     config = function()
-      local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
-
       require("mason").setup({
         ui = {
           icons = {
@@ -12,21 +82,17 @@ return {
             package_uninstalled = "✗",
           },
         },
-        automatic_installation = not is_termux,
       })
     end,
   },
   {
     "williamboman/mason-lspconfig.nvim",
     config = function()
-      local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
-
-      local setup_opts = {
-        automatic_enable = true,
-      }
-
+      local ensure_installed = {}
+      
+      -- Only auto-install on non-Termux platforms (Mason doesn't work well on Termux)
       if not is_termux then
-        setup_opts.ensure_installed = {
+        ensure_installed = {
           "lua_ls",
           "clangd",
           "pyright",
@@ -41,7 +107,10 @@ return {
         }
       end
 
-      require("mason-lspconfig").setup(setup_opts)
+      require("mason-lspconfig").setup({
+        ensure_installed = ensure_installed,
+        automatic_installation = not is_termux,
+      })
     end,
   },
   {
@@ -50,53 +119,14 @@ return {
     config = function()
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
-      local termux_prefix = is_termux and vim.env.PREFIX or nil
-
-      -- Helper function to create LSP command with proper environment for Termux
-      local function create_lsp_cmd(executable, args, env_overrides)
-        local cmd_table = { executable }
-        if args then
-          for _, arg in ipairs(args) do
-            table.insert(cmd_table, arg)
-          end
-        end
-
-        local cmd_env = nil
-        if is_termux and termux_prefix then
-          -- Set up environment for Termux execution
-          cmd_env = {
-            LD_PRELOAD = termux_prefix .. "/lib/libtermux-exec.so",
-            PATH = termux_prefix .. "/bin:" .. termux_prefix .. "/usr/bin:" .. (os.getenv("PATH") or ""),
-          }
-
-          -- Merge any additional environment overrides
-          if env_overrides then
-            for key, value in pairs(env_overrides) do
-              cmd_env[key] = value
-            end
-          end
-        end
-
-        return {
-          cmd = cmd_table,
-          cmd_env = cmd_env,
-        }
-      end
-
-      -- Diagnostic signs configuration
-      vim.fn.sign_define("DiagnosticSignError", { text = " ", texthl = "DiagnosticSignError" })
-      vim.fn.sign_define("DiagnosticSignWarn", { text = " ", texthl = "DiagnosticSignWarn" })
-      vim.fn.sign_define("DiagnosticSignHint", { text = " ", texthl = "DiagnosticSignHint" })
-      vim.fn.sign_define("DiagnosticSignInfo", { text = " ", texthl = "DiagnosticSignInfo" })
-
+      -- Diagnostic configuration
       vim.diagnostic.config({
         signs = {
-          severity = {
-            ERROR = { text = " " },
-            WARN = { text = " " },
-            HINT = { text = " " },
-            INFO = { text = " " },
+          text = {
+            [vim.diagnostic.severity.ERROR] = " ",
+            [vim.diagnostic.severity.WARN] = " ",
+            [vim.diagnostic.severity.HINT] = " ",
+            [vim.diagnostic.severity.INFO] = " ",
           },
         },
         virtual_text = {
@@ -105,251 +135,155 @@ return {
         },
         float = {
           border = "rounded",
-          source = "always",
+          source = true,
         },
         underline = true,
         update_in_insert = false,
         severity_sort = true,
       })
 
-      -- lua_ls configuration - cross-platform
-      local lua_ls_setup = create_lsp_cmd("lua-language-server", { "--stdio" })
-      vim.lsp.config("lua_ls", {
-        capabilities = capabilities,
-        cmd = lua_ls_setup.cmd,
-        cmd_env = lua_ls_setup.cmd_env,
-        settings = {
-          Lua = {
-            diagnostics = {
-              globals = { "vim" },
-            },
-            workspace = {
-              library = {
-                [vim.fn.expand("$VIMRUNTIME/lua")] = true,
-                [vim.fn.stdpath("data") .. "/lazy/ui/nvim.lua"] = true,
+      -- SchemaStore for JSON/YAML (with fallback)
+      local schemastore_ok, schemastore = pcall(require, "schemastore")
+
+      -- LSP server configurations
+      local servers = {
+        lua_ls = {
+          args = {},
+          settings = {
+            Lua = {
+              diagnostics = { globals = { "vim" } },
+              workspace = {
+                library = {
+                  [vim.fn.expand("$VIMRUNTIME/lua")] = true,
+                  [vim.fn.stdpath("data") .. "/lazy"] = true,
+                },
+                checkThirdParty = false,
               },
-              checkThirdParty = false,
-            },
-            completion = {
-              callSnippet = "Replace",
+              completion = { callSnippet = "Replace" },
+              telemetry = { enable = false },
             },
           },
         },
-      })
-
-      -- clangd configuration
-      local clangd_setup = create_lsp_cmd("clangd", { "--offset-encoding=utf-16" })
-      vim.lsp.config("clangd", {
-        capabilities = capabilities,
-        cmd = clangd_setup.cmd,
-        cmd_env = clangd_setup.cmd_env,
-        offset_encoding = "utf-16",
-      })
-
-      -- pyright configuration
-      local pyright_setup = create_lsp_cmd("pyright-langserver", { "--stdio" })
-      vim.lsp.config("pyright", {
-        capabilities = capabilities,
-        cmd = pyright_setup.cmd,
-        cmd_env = pyright_setup.cmd_env,
-        settings = {
-          pyright = {
-            disableOrganizeImports = false,
-            analysis = {
-              typeCheckingMode = "basic",
-              autoSearchPaths = true,
-              diagnosticMode = "workspace",
+        clangd = {
+          args = { "--offset-encoding=utf-16" },
+          offset_encoding = "utf-16",
+        },
+        pyright = {
+          args = { "--stdio" },
+          settings = {
+            pyright = {
+              disableOrganizeImports = false,
+            },
+            python = {
+              analysis = {
+                typeCheckingMode = "basic",
+                autoSearchPaths = true,
+                diagnosticMode = "workspace",
+              },
             },
           },
         },
-      })
-
-      -- ts_ls configuration
-      local ts_ls_setup = create_lsp_cmd("typescript-language-server", { "--stdio" })
-      vim.lsp.config("ts_ls", {
-        capabilities = capabilities,
-        cmd = ts_ls_setup.cmd,
-        cmd_env = ts_ls_setup.cmd_env,
-        settings = {
-          typescript = {
-            format = { indentSize = 2, semicolons = true },
-          },
-          javascript = {
-            format = { indentSize = 2, semicolons = true },
+        ts_ls = {
+          args = { "--stdio" },
+          settings = {
+            typescript = { format = { indentSize = 2 } },
+            javascript = { format = { indentSize = 2 } },
           },
         },
-      })
-
-      -- rust_analyzer configuration
-      local rust_setup = create_lsp_cmd("rust-analyzer", nil)
-      vim.lsp.config("rust_analyzer", {
-        capabilities = capabilities,
-        cmd = rust_setup.cmd,
-        cmd_env = rust_setup.cmd_env,
-        settings = {
-          ["rust-analyzer"] = {
-            cargo = {
-              allFeatures = true,
-            },
-            procMacro = {
-              enable = true,
-            },
-            check = {
-              command = "clippy",
-            },
-            diagnostics = {
-              enable = true,
+        rust_analyzer = {
+          args = {},
+          settings = {
+            ["rust-analyzer"] = {
+              cargo = { allFeatures = true },
+              procMacro = { enable = true },
+              check = { command = "clippy" },
+              diagnostics = { enable = true },
             },
           },
         },
-      })
-
-      -- gopls configuration
-      local gopls_setup = create_lsp_cmd("gopls", { "serve" })
-      vim.lsp.config("gopls", {
-        capabilities = capabilities,
-        cmd = gopls_setup.cmd,
-        cmd_env = gopls_setup.cmd_env,
-        settings = {
-          gopls = {
-            gofumpt = true,
-            analyses = {
-              unusedvariables = true,
-            },
-            staticcheck = true,
-          },
-        },
-      })
-
-      -- jsonls configuration
-      local jsonls_setup = create_lsp_cmd("json-language-server", { "--stdio" })
-      vim.lsp.config("jsonls", {
-        capabilities = capabilities,
-        cmd = jsonls_setup.cmd,
-        cmd_env = jsonls_setup.cmd_env,
-        filetypes = { "json", "jsonc" },
-        settings = {
-          json = {
-            schemas = require("schemastore").json.schemas(),
-            validate = {
-              enable = true,
+        gopls = {
+          args = { "serve" },
+          settings = {
+            gopls = {
+              gofumpt = true,
+              analyses = { unusedvariables = true },
+              staticcheck = true,
             },
           },
         },
-      })
-
-      -- yamlls configuration
-      local yamlls_setup = create_lsp_cmd("yaml-language-server", { "--stdio" })
-      vim.lsp.config("yamlls", {
-        capabilities = capabilities,
-        cmd = yamlls_setup.cmd,
-        cmd_env = yamlls_setup.cmd_env,
-        settings = {
-          yaml = {
-            schemas = require("schemastore").yaml.schemas(),
-            validate = true,
+        jsonls = {
+          args = { "--stdio" },
+          filetypes = { "json", "jsonc" },
+          settings = {
+            json = {
+              schemas = schemastore_ok and schemastore.json.schemas() or {},
+              validate = { enable = true },
+            },
           },
         },
-      })
+        yamlls = {
+          args = { "--stdio" },
+          settings = {
+            yaml = {
+              schemas = schemastore_ok and schemastore.yaml.schemas() or {},
+              validate = true,
+            },
+          },
+        },
+        bashls = {
+          args = { "start" },
+          filetypes = { "bash", "sh", "zsh" },
+        },
+        cssls = {
+          args = { "--stdio" },
+          filetypes = { "css", "scss", "less" },
+          settings = {
+            css = { validate = true },
+          },
+        },
+        html = {
+          args = { "--stdio" },
+          filetypes = { "html", "htmldjango" },
+          settings = {
+            html = { format = { enable = true } },
+          },
+        },
+      }
 
-      -- bashls configuration - cross-platform with path detection
-      local bashls_setup
-      if is_termux and termux_prefix then
-        -- On Termux, use PREFIX/bin path
-        bashls_setup = create_lsp_cmd(termux_prefix .. "/bin/bash-language-server", { "start" })
-      else
-        -- On macOS/Linux, try multiple standard locations
-        local bashls_paths = {
-          "/opt/homebrew/bin/bash-language-server", -- Homebrew on Apple Silicon
-          "/usr/local/bin/bash-language-server", -- Homebrew on Intel or system
-          "bash-language-server", -- PATH lookup
-        }
+      -- Track which servers are available
+      local available_servers = {}
 
-        local found_path = nil
-        for _, path in ipairs(bashls_paths) do
-          if path == "bash-language-server" then
-            if vim.fn.executable(path) == 1 then
-              found_path = path
-              break
-            end
-          else
-            if vim.fn.filereadable(path) == 1 then
-              found_path = path
-              break
-            end
-          end
+      -- Configure each server
+      for server_name, config in pairs(servers) do
+        local lsp_cmd = create_lsp_cmd(server_name, config.args)
+        
+        if lsp_cmd then
+          available_servers[server_name] = true
+          
+          vim.lsp.config(server_name, {
+            capabilities = capabilities,
+            cmd = lsp_cmd.cmd,
+            cmd_env = lsp_cmd.cmd_env,
+            filetypes = config.filetypes,
+            settings = config.settings,
+            offset_encoding = config.offset_encoding,
+          })
         end
-
-        bashls_setup = create_lsp_cmd(found_path or "bash-language-server", { "start" })
       end
 
-      vim.lsp.config("bashls", {
-        capabilities = capabilities,
-        cmd = bashls_setup.cmd,
-        cmd_env = bashls_setup.cmd_env,
-        filetypes = { "bash", "sh", "zsh" },
-        root_dir = function(fname)
-          if type(fname) ~= "string" or fname == "" then
-            return vim.fn.getcwd()
-          end
-          local ok, git_dir = pcall(vim.fs.find, ".git", { path = vim.fs.dirname(fname), upward = true })
-          if not ok or type(git_dir) ~= "table" or #git_dir == 0 then
-            return vim.fs.dirname(fname) or vim.fn.getcwd()
-          end
-          local root = git_dir[1]
-          if type(root) == "string" and root ~= "" then
-            return vim.fs.dirname(root) or vim.fn.getcwd()
-          end
-          return vim.fs.dirname(fname) or vim.fn.getcwd()
-        end,
-      })
+      -- Enable only available servers
+      local servers_to_enable = {}
+      for server_name, _ in pairs(available_servers) do
+        table.insert(servers_to_enable, server_name)
+      end
+      
+      if #servers_to_enable > 0 then
+        vim.lsp.enable(servers_to_enable)
+      end
 
-      -- cssls configuration
-      local cssls_setup = create_lsp_cmd("css-language-server", { "--stdio" })
-      vim.lsp.config("cssls", {
-        capabilities = capabilities,
-        cmd = cssls_setup.cmd,
-        cmd_env = cssls_setup.cmd_env,
-        filetypes = { "css", "scss", "less" },
-        settings = {
-          css = {
-            validate = true,
-          },
-        },
-      })
-
-      -- html configuration
-      local html_setup = create_lsp_cmd("html-language-server", { "--stdio" })
-      vim.lsp.config("html", {
-        capabilities = capabilities,
-        cmd = html_setup.cmd,
-        cmd_env = html_setup.cmd_env,
-        filetypes = { "html", "htmldjango" },
-        settings = {
-          html = {
-            format = {
-              enable = true,
-            },
-          },
-        },
-      })
-
-      vim.lsp.enable({
-        "lua_ls",
-        "clangd",
-        "pyright",
-        "ts_ls",
-        "rust_analyzer",
-        "gopls",
-        "jsonls",
-        "yamlls",
-        "bashls",
-        "cssls",
-        "html",
-      })
-
-      -- LSP server configurations by filetype
-      local ft_to_lsp = {
+      -- Filetype to LSP mapping (only include available servers)
+      local ft_to_lsp = {}
+      local ft_mappings = {
         lua = "lua_ls",
         python = "pyright",
         typescript = "ts_ls",
@@ -371,55 +305,20 @@ return {
         less = "cssls",
         html = "html",
       }
+      
+      for ft, server in pairs(ft_mappings) do
+        if available_servers[server] then
+          ft_to_lsp[ft] = server
+        end
+      end
 
-      -- Auto-attach LSP clients to matching buffers
-      vim.api.nvim_create_autocmd({ "BufReadPost", "BufNewFile" }, {
-        group = vim.api.nvim_create_augroup("LspAutoAttach", { clear = true }),
-        callback = function(args)
-          local bufnr = args.buf
-          local filetype = vim.api.nvim_get_option_value("filetype", { buf = bufnr })
-          local server_name = ft_to_lsp[filetype]
-
-          if not server_name then
-            return
-          end
-
-          -- Check if this LSP is already running
-          for _, client in ipairs(vim.lsp.get_clients() or {}) do
-            if client.name == server_name then
-              -- Already running, just attach to this buffer (triggers LspAttach)
-              vim.lsp.buf_attach_client(bufnr, client)
-              return
-            end
-          end
-
-          -- Get the server config
-          local config = vim.lsp.config[server_name]
-          if not config then
-            return
-          end
-
-          -- Start the LSP server and attach to buffer
-          local bufname = vim.api.nvim_buf_get_name(bufnr)
-          local client = vim.lsp.start({
-            name = server_name,
-            cmd = config.cmd,
-            cmd_env = config.cmd_env,
-            root_dir = config.root_dir and config.root_dir(bufname) or vim.fn.getcwd(),
-          })
-
-          -- Attach the client to this buffer (this triggers LspAttach autocmd)
-          if client then
-            vim.lsp.buf_attach_client(bufnr, client)
-          end
-        end,
-      })
-
+      -- LspAttach autocmd for keybindings
       vim.api.nvim_create_autocmd("LspAttach", {
-        group = vim.api.nvim_create_augroup("UserLspConfig", {}),
+        group = vim.api.nvim_create_augroup("UserLspConfig", { clear = true }),
         callback = function(args)
           local bufnr = args.buf
           local client = vim.lsp.get_client_by_id(args.data.client_id)
+          if not client then return end
 
           local opts = { buffer = bufnr, silent = true }
 
@@ -434,11 +333,25 @@ return {
           vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
           vim.keymap.set("n", "<leader>cd", vim.diagnostic.open_float, opts)
 
-          if client and client.supports_method("textDocument/inlayHint") then
-            pcall(vim.lsp.inlay_hint.enable, bufnr, true)
+          if client.supports_method("textDocument/inlayHint") then
+            pcall(vim.lsp.inlay_hint.enable, true, { bufnr = bufnr })
           end
         end,
       })
+
+      -- Create user command to show LSP status
+      vim.api.nvim_create_user_command("LspStatus", function()
+        local lines = { "LSP Server Status:", "" }
+        for server_name, _ in pairs(servers) do
+          local status = available_servers[server_name] and "✓ Available" or "✗ Not found"
+          local exec = lsp_executables[server_name] and table.concat(lsp_executables[server_name], ", ") or server_name
+          table.insert(lines, string.format("  %s: %s (%s)", server_name, status, exec))
+        end
+        table.insert(lines, "")
+        table.insert(lines, "Platform: " .. (is_termux and "Termux" or (is_windows and "Windows" or "Unix")))
+        table.insert(lines, "Mason bin: " .. mason_bin)
+        vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO)
+      end, {})
     end,
   },
 }

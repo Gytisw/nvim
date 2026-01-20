@@ -43,8 +43,3 @@ vim.opt.fillchars = {
   foldclose = "",
   foldsep = "│",
 }
-
-if jit then
-  jit.off()
-  jit.opt.start("maxmcode=5000")
-end
