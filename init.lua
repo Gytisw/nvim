@@ -3,3 +3,6 @@
 
 require("config.options")
 require("config.lazy")
+
+-- Termux LSP auto-installer (only runs on Termux)
+require("config.termux").setup()
