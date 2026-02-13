@@ -1,8 +1,28 @@
 -- Cross-platform LSP configuration
--- Supports: macOS, Linux, Windows, Termux (Android)
+-- Supports: macOS, Linux, Windows, Termux (Android), proot-distro (Kali Nethunter)
+
+-- Detect if running on Android (includes Termux and proot-distro)
+local function is_android()
+  -- Check kernel name for "Android" which works in both Termux and proot-distro
+  local kernel = vim.fn.system({ "uname", "-s" }):gsub("%s+", "")
+  if kernel:match("Linux") then
+    -- On Linux, check if we're running on Android kernel
+    local release = vim.fn.system({ "uname", "-r" }):gsub("%s+", "")
+    -- Try multiple detection methods for proot-distro compatibility
+    return (
+      -- Method 1: Check kernel release (Android kernels often have -android suffix)
+      release:match("android") or
+      -- Method 2: Check PREFIX env var (native Termux)
+      (vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil) or
+      -- Method 3: Check for Android property command (works in proot-distro)
+      (vim.fn.executable("getprop") == 1 and vim.fn.system("getprop ro.build.version.sdk"):gsub("%s+", "") ~= "")
+    )
+  end
+  return false
+end
 
 -- Platform detection
-local is_termux = vim.env.PREFIX and vim.env.PREFIX:find("termux") ~= nil
+local is_termux = is_android()  -- Detects Android/Termux/proot-distro
 local is_windows = vim.fn.has("win32") == 1 or vim.fn.has("win64") == 1
 local termux_prefix = is_termux and vim.env.PREFIX or nil
 
